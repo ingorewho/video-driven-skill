@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+  datasource:
+    url: jdbc:sqlite:${user.home}/video-driven-skill/video-driven-skill.db
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+app:
+  upload-dir: ${user.home}/video-driven-skill/uploads
+  skills-dir: ${user.home}/video-driven-skill/skills
+  archive-dir: ${user.home}/video-driven-skill/archives
+  ffmpeg-path: ${FFMPEG_PATH:ffmpeg}
+  ai-api-key: ${AI_API_KEY:}
+  ai-base-url: ${AI_BASE_URL:https://api.openai.com/v1}
+  ai-model: ${AI_MODEL:gpt-4o-mini}
+  # Skill 运行超时时间（秒），默认 180 秒
+  runner:
+    timeout: 600
+
+logging:
+  level:
+    io.videodrivenskill: DEBUG
