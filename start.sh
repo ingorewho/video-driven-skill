@@ -16,6 +16,7 @@ BACKEND_PORT=8080
 FRONTEND_PORT=3000
 BACKEND_READY_TIMEOUT=90   # Spring Boot 冷启动较慢，给足时间
 FRONTEND_READY_TIMEOUT=30
+APP_DATA_DIR="${VIDEO_DRIVEN_SKILL_HOME:-$HOME/video-driven-skill}"
 
 JAVA17_HOME="${JAVA_HOME:-}"
 
@@ -75,6 +76,8 @@ preflight() {
     err "需要 Java 17+ (当前 JAVA_HOME=${JAVA_HOME:-未设置})"
     exit 1
   fi
+
+  mkdir -p "$APP_DATA_DIR/uploads" "$APP_DATA_DIR/skills" "$APP_DATA_DIR/archives"
 }
 
 # ---------- 后端 ----------
