@@ -18,7 +18,7 @@ BACKEND_READY_TIMEOUT=90   # Spring Boot 冷启动较慢，给足时间
 FRONTEND_READY_TIMEOUT=30
 APP_DATA_DIR="${VIDEO_DRIVEN_SKILL_HOME:-$HOME/video-driven-skill}"
 
-JAVA17_HOME="${JAVA_HOME:-}"
+JAVA17_HOME="${JAVA17_HOME:-}"
 
 mkdir -p "$LOG_DIR"
 
@@ -63,15 +63,25 @@ preflight() {
   done
   [ "$missing" = "1" ] && exit 1
 
-  if [ -n "$JAVA17_HOME" ] && [ -d "$JAVA17_HOME" ]; then
-    export JAVA_HOME="$JAVA17_HOME"
+  local selected_java_home=""
+  if [ -n "${JAVA17_HOME:-}" ] && [ -x "$JAVA17_HOME/bin/java" ]; then
+    selected_java_home="$JAVA17_HOME"
+  elif [ -x /usr/libexec/java_home ]; then
+    selected_java_home="$(/usr/libexec/java_home -v 17 2>/dev/null || true)"
+  elif [ -n "${JAVA_HOME:-}" ] && [ -x "$JAVA_HOME/bin/java" ]; then
+    selected_java_home="$JAVA_HOME"
   fi
+
+  if [ -n "$selected_java_home" ]; then
+    export JAVA_HOME="$selected_java_home"
+  fi
+
   local java_bin="java"
   if [ -n "${JAVA_HOME:-}" ] && [ -x "$JAVA_HOME/bin/java" ]; then
     java_bin="$JAVA_HOME/bin/java"
   fi
   local java_major
-  java_major=$("$java_bin" -version 2>&1 | awk -F '"' '/version/ {print $2}' | awk -F'.' '{print $1}')
+  java_major=$("$java_bin" -version 2>&1 | awk -F '"' '/version/ {split($2, v, "."); if (v[1] == "1") print v[2]; else print v[1]}')
   if [ -z "$java_major" ] || [ "$java_major" -lt 17 ] 2>/dev/null; then
     err "需要 Java 17+ (当前 JAVA_HOME=${JAVA_HOME:-未设置})"
     exit 1
