@@ -177,8 +177,9 @@ video-driven-skill/
 ├── backend/                 # Spring Boot — API, video processing, AI, skill runner
 ├── frontend/                # React + Vite — studio UI
 ├── docs/                    # Documentation & screenshots
-├── start.sh                 # Local development helper
-└── kill-midscene.sh         # Optional cleanup helper
+├── scripts/
+│   └── kill-midscene.sh  # Optional cleanup helper
+├── start.sh              # Local development helper
 ```
 
 ### Backend (Spring Boot / Java 17)
