@@ -79,7 +79,7 @@ export default function FrameAnnotator() {
     const canvas = new fabric.Canvas(canvasRef.current, {
       width: 640,
       height: 360,
-      backgroundColor: '#1e293b',
+      backgroundColor: '#F5F0E8',
     })
     fabricRef.current = canvas
 
@@ -106,7 +106,7 @@ export default function FrameAnnotator() {
         const text = new fabric.IText('文字', {
           left: pointer.x,
           top: pointer.y,
-          fill: '#facc15',
+          fill: '#9A6B3F',
           fontSize: 18,
           fontWeight: 'bold',
         })
@@ -122,14 +122,14 @@ export default function FrameAnnotator() {
       if (toolRef.current === 'arrow') {
         // 用 line + triangle 组合实现带箭头的线，拖拽时先放预览线
         const line = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
-          stroke: '#f87171',
+          stroke: '#B87E6B',
           strokeWidth: 2.5,
           selectable: false,
           evented: false,
         })
         const head = new fabric.Triangle({
           width: 12, height: 14,
-          fill: '#f87171',
+          fill: '#B87E6B',
           left: pointer.x, top: pointer.y,
           originX: 'center', originY: 'center',
           angle: 90,
@@ -146,7 +146,7 @@ export default function FrameAnnotator() {
           top: pointer.y,
           width: 1,
           height: 1,
-          stroke: '#60a5fa',
+          stroke: '#9A6B3F',
           strokeWidth: 2,
           fill: 'transparent',
           selectable: true,
@@ -294,16 +294,16 @@ export default function FrameAnnotator() {
   }
 
   return (
-    <div className='space-y-2'>
+    <div className='flex h-full min-h-0 flex-col gap-3'>
       {/* Toolbar */}
-      <div className='flex items-center gap-2'>
+      <div className='flex flex-wrap items-center gap-2 rounded-2xl border border-ink-900/8 bg-paper-100/70 p-2'>
         {TOOLS.map(t => (
           <button
             key={t.id}
             onClick={() => changeTool(t.id)}
             disabled={!selectedFrame}
-            className={`px-3 py-1 rounded-lg text-sm transition-colors
-              ${tool === t.id ? 'bg-blue-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'}
+            className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition-all
+              ${tool === t.id ? 'bg-ink-900 text-paper-50 shadow-soft' : 'text-ink-500 hover:bg-paper-200 hover:text-ink-900'}
               ${!selectedFrame ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {t.label}
@@ -312,7 +312,7 @@ export default function FrameAnnotator() {
         <button
           onClick={clearAnnotations}
           disabled={!selectedFrame}
-          className={`ml-auto px-3 py-1 rounded-lg text-sm bg-slate-700 hover:bg-red-900 text-slate-300 transition-colors
+          className={`ml-auto rounded-full px-3 py-1.5 text-[13px] font-medium text-ink-500 transition-all hover:bg-clay-500/10 hover:text-clay-700
             ${!selectedFrame ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           清除标注
@@ -320,10 +320,12 @@ export default function FrameAnnotator() {
       </div>
 
       {/* Canvas - always rendered with placeholder overlay when no frame */}
-      <div className='relative rounded-xl overflow-hidden border border-slate-700'>
-        <canvas ref={canvasRef} />
+      <div className='relative flex-1 overflow-hidden rounded-2xl border border-ink-900/10 bg-paper-100 shadow-inset-hair'>
+        <div className='flex h-full min-h-[360px] items-center justify-center p-3'>
+          <canvas ref={canvasRef} className='max-w-full rounded-xl shadow-soft' />
+        </div>
         {!selectedFrame && (
-          <div className='absolute inset-0 flex items-center justify-center bg-slate-800/80 text-slate-500'>
+          <div className='absolute inset-0 flex items-center justify-center bg-paper-100/85 text-sm text-ink-400 backdrop-blur-sm'>
             请从时间轴选择一帧进行标注
           </div>
         )}

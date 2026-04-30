@@ -17,7 +17,7 @@ export default function FrameGridSelector({ frames, selectedIds, onToggle, maxSe
         </p>
         <ul className="text-xs text-slate-600 mt-2 space-y-1 text-center">
           <li>• 不选图片，直接使用纯文本模式优化代码</li>
-          <li>• 返回「标注帧」页面上传视频并抽帧</li>
+          <li>• 返回「Skill 生成」页面上传视频并抽帧</li>
         </ul>
       </div>
     )

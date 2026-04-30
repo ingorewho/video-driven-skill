@@ -83,14 +83,14 @@ export default function FrameList() {
 
   if (frames.length === 0) {
     return (
-      <div className='text-center py-8 text-slate-500 text-sm'>
+      <div className='rounded-2xl border border-dashed border-ink-900/12 bg-paper-100/60 py-8 text-center text-sm text-ink-400'>
         暂无帧
       </div>
     )
   }
 
   return (
-    <div className='space-y-2 overflow-y-auto max-h-96 scrollbar-thin pr-1'>
+    <div className='max-h-[42vh] space-y-2 overflow-y-auto pr-1 scrollbar-thin'>
       {frames.map((frame, index) => (
         <div
           key={frame.frameId}
@@ -100,23 +100,23 @@ export default function FrameList() {
           onDragOver={(e) => handleDragOver(e, index)}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, index)}
-          className={`group flex gap-3 p-2 rounded-lg cursor-move border transition-all
+          className={`group flex cursor-move gap-3 rounded-2xl border p-2 transition-all
             ${selectedFrameId === frame.frameId
-              ? 'border-blue-500 bg-blue-900/20'
-              : 'border-transparent bg-slate-800/50 hover:bg-slate-800'}
-            ${dragOverIndex === index ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-slate-900' : ''}
+              ? 'border-umber-400 bg-umber-50/70 shadow-soft'
+              : 'border-ink-900/8 bg-paper-100/50 hover:bg-paper-50 hover:border-ink-900/14'}
+            ${dragOverIndex === index ? 'ring-2 ring-umber-400 ring-offset-2 ring-offset-paper-50' : ''}
             ${dragItemRef.current === index ? 'opacity-50' : ''}`}
           onClick={() => setSelectedFrameId(frame.frameId)}
           title={`第 ${index + 1} 帧 - 拖拽可调整顺序`}
         >
           {/* 序号和移动按钮 */}
           <div className='flex flex-col items-center justify-center gap-1'>
-            <span className='text-slate-500 text-xs font-mono w-5 text-center'>{index + 1}</span>
+            <span className='w-6 rounded-full bg-ink-900/80 py-0.5 text-center font-mono text-[10px] text-paper-50'>{String(index + 1).padStart(2, '0')}</span>
             
             {/* 上移按钮 */}
             {index > 0 && (
               <button
-                className='w-5 h-5 flex items-center justify-center text-slate-600 hover:text-blue-400 hover:bg-slate-700 rounded transition-colors'
+                className='flex h-5 w-5 items-center justify-center rounded-full text-ink-400 transition-colors hover:bg-paper-200 hover:text-ink-900'
                 onClick={(e) => handleMove(e, frame.frameId, 'left')}
                 title='上移'
               >
@@ -127,7 +127,7 @@ export default function FrameList() {
             {/* 下移按钮 */}
             {index < frames.length - 1 && (
               <button
-                className='w-5 h-5 flex items-center justify-center text-slate-600 hover:text-blue-400 hover:bg-slate-700 rounded transition-colors'
+                className='flex h-5 w-5 items-center justify-center rounded-full text-ink-400 transition-colors hover:bg-paper-200 hover:text-ink-900'
                 onClick={(e) => handleMove(e, frame.frameId, 'right')}
                 title='下移'
               >
@@ -140,18 +140,18 @@ export default function FrameList() {
           <img
             src={`data:image/jpeg;base64,${frame.base64Image}`}
             alt={`Frame ${index + 1}`}
-            className='w-16 h-10 object-cover rounded flex-shrink-0 pointer-events-none'
+            className='h-12 w-20 flex-shrink-0 rounded-xl object-cover pointer-events-none ring-1 ring-ink-900/10'
             draggable={false}
           />
 
           {/* Info */}
           <div className='flex-1 min-w-0'>
             <div className='flex items-center justify-between mb-1'>
-              <span className='text-slate-400 text-xs font-mono'>{fmt(frame.timestamp)}</span>
+              <span className='font-mono text-[11px] text-ink-400'>{fmt(frame.timestamp)}</span>
               <button
                 onClick={(e) => handleDelete(e, frame.frameId, index)}
                 disabled={deletingId === frame.frameId}
-                className={`text-slate-600 hover:text-red-400 text-xs px-1 rounded transition-colors
+                className={`rounded px-1 text-[11px] text-ink-400 transition-colors hover:text-clay-500
                   ${deletingId === frame.frameId ? 'opacity-50' : ''}`}
               >
                 {deletingId === frame.frameId ? '删除中...' : '删除'}
@@ -163,7 +163,7 @@ export default function FrameList() {
               value={frame.description || ''}
               onChange={(e) => updateFrameDescription(frame.frameId, e.target.value)}
               onClick={(e) => e.stopPropagation()}
-              className='w-full bg-transparent text-slate-300 text-xs placeholder-slate-600 outline-none border-b border-transparent focus:border-slate-600 transition-colors'
+              className='w-full border-b border-transparent bg-transparent text-xs text-ink-700 outline-none transition-colors placeholder:text-ink-400 focus:border-umber-400'
             />
           </div>
         </div>

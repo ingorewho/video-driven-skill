@@ -38,6 +38,29 @@ public class AIService {
     return requestedModel == null || requestedModel.isBlank() ? model : requestedModel;
   }
 
+  private String resolveModel(GenerateSkillRequest request, String requestedModel) {
+    String configured = request.getAiConfig() != null ? request.getAiConfig().getModel() : null;
+    return resolveModel(configured == null || configured.isBlank() ? requestedModel : configured);
+  }
+
+  private String resolveApiKey(GenerateSkillRequest request) {
+    String configured = request.getAiConfig() != null ? request.getAiConfig().getApiKey() : null;
+    String effectiveApiKey = configured == null || configured.isBlank() ? apiKey : configured;
+    if (effectiveApiKey == null || effectiveApiKey.isBlank()) {
+      throw new IllegalStateException("AI_API_KEY is not configured. Please set it in .env or provide it in visual model settings.");
+    }
+    return effectiveApiKey;
+  }
+
+  private String resolveBaseUrl(GenerateSkillRequest request) {
+    String configured = request.getAiConfig() != null ? request.getAiConfig().getBaseUrl() : null;
+    String effectiveBaseUrl = configured == null || configured.isBlank() ? baseUrl : configured;
+    if (effectiveBaseUrl == null || effectiveBaseUrl.isBlank()) {
+      throw new IllegalStateException("AI_BASE_URL is not configured.");
+    }
+    return effectiveBaseUrl.replaceAll("/+$", "");
+  }
+
   public Map<String, Object> generateSkill(GenerateSkillRequest request, Consumer<String> logger) throws IOException {
     return generateSkill(request, null, logger);
   }
@@ -50,7 +73,9 @@ public class AIService {
    * 使用图片的多模态生成（首次生成时使用）
    */
   public Map<String, Object> generateSkillWithImages(GenerateSkillRequest request, String additionalPrompt, String useModel, Consumer<String> logger) throws IOException {
-    String effectiveModel = resolveModel(useModel);
+    String effectiveModel = resolveModel(request, useModel);
+    String effectiveBaseUrl = resolveBaseUrl(request);
+    String effectiveApiKey = resolveApiKey(request);
     int frameCount = request.getFrames() != null ? request.getFrames().size() : 0;
     if (additionalPrompt != null && !additionalPrompt.trim().isEmpty()) {
       logger.accept("🔄 重新生成模式：第 N 次迭代，补充要求已添加");
@@ -77,11 +102,12 @@ public class AIService {
     String jsonBody = objectMapper.writeValueAsString(requestBody);
     int approxKb = jsonBody.length() / 1024;
     logger.accept("📡 发送请求到 " + effectiveModel + "，请求大小约 " + approxKb + " KB");
+    logger.accept("🔧 视觉模型接口：" + effectiveBaseUrl);
 
     Request httpRequest = new Request.Builder()
-        .url(baseUrl + "/chat/completions")
+        .url(effectiveBaseUrl + "/chat/completions")
         .post(RequestBody.create(jsonBody, MediaType.parse("application/json")))
-        .header("Authorization", "Bearer " + apiKey)
+        .header("Authorization", "Bearer " + effectiveApiKey)
         .header("Content-Type", "application/json")
         .build();
 

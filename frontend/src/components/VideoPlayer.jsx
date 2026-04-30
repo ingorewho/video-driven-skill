@@ -43,25 +43,26 @@ export default function VideoPlayer({ videoId, duration, onTimeSelect }) {
   }
 
   return (
-    <div className='bg-slate-800 rounded-xl overflow-hidden'>
-      <video
-        ref={videoRef}
-        src={src}
-        className='w-full aspect-video bg-black'
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-        onEnded={() => setPlaying(false)}
-      />
+    <div className='overflow-hidden rounded-2xl border border-ink-900/10 bg-paper-100 shadow-inset-hair'>
+      <div className='relative bg-[#18120b]'>
+        <video
+          ref={videoRef}
+          src={src}
+          className='mx-auto block max-h-[68vh] w-full bg-[#18120b] object-contain'
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onEnded={() => setPlaying(false)}
+        />
+        <div className='pointer-events-none absolute inset-0 ring-1 ring-inset ring-paper-50/10' />
+      </div>
 
-      {/* Controls */}
-      <div className='p-3'>
-        {/* Progress bar */}
+      <div className='border-t border-ink-900/10 bg-paper-50/95 p-3'>
         <div
-          className='w-full h-2 bg-slate-600 rounded-full cursor-pointer mb-3 relative'
+          className='relative mb-3 h-2 cursor-pointer overflow-hidden rounded-full bg-ink-900/10'
           onClick={handleSeek}
         >
           <div
-            className='h-full bg-blue-500 rounded-full'
+            className='h-full rounded-full bg-gradient-to-r from-umber-400 to-umber-600 shadow-[0_0_18px_rgba(154,107,63,0.25)]'
             style={{ width: duration ? `${(currentTime / duration) * 100}%` : '0%' }}
           />
         </div>
@@ -69,23 +70,22 @@ export default function VideoPlayer({ videoId, duration, onTimeSelect }) {
         <div className='flex items-center gap-3'>
           <button
             onClick={togglePlay}
-            className='w-8 h-8 flex items-center justify-center bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-white text-sm'
+            className='flex h-9 w-9 items-center justify-center rounded-full bg-ink-900 text-paper-50 shadow-soft transition-all hover:-translate-y-0.5 hover:bg-umber-600'
+            title={playing ? '暂停' : '播放'}
           >
-            {playing ? '⏸' : '▶'}
+            {playing ? 'Ⅱ' : '▶'}
           </button>
 
-          <span className='text-slate-400 text-sm font-mono'>
+          <span className='font-mono text-[12px] tabular-nums text-ink-500'>
             {fmt(currentTime)} / {fmt(duration || 0)}
           </span>
 
-          <div className='ml-auto'>
-            <button
-              onClick={handleCapture}
-              className='px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded-lg transition-colors'
-            >
-              截取当前帧
-            </button>
-          </div>
+          <button
+            onClick={handleCapture}
+            className='ml-auto rounded-full bg-umber-50 px-4 py-2 text-[13px] font-medium text-umber-700 ring-1 ring-umber-300/50 transition-all hover:-translate-y-0.5 hover:bg-umber-100 hover:ring-umber-400/60'
+          >
+            截取当前帧
+          </button>
         </div>
       </div>
     </div>

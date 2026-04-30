@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import useAppStore from '../store/useAppStore.js'
 import { generateSkill } from '../api/client.js'
 
@@ -13,9 +13,28 @@ export default function AIProcessor() {
 
   const [logs, setLogs] = useState([])
   const [error, setError] = useState(null)
+  const [showModelConfig, setShowModelConfig] = useState(false)
+  const [aiBaseUrl, setAiBaseUrl] = useState('')
+  const [aiModel, setAiModel] = useState('')
+  const [aiApiKey, setAiApiKey] = useState('')
   const esRef = useRef(null)
 
   const canGenerate = frames.length > 0 && requirement.trim().length > 0 && !isGenerating
+
+  useEffect(() => {
+    setAiBaseUrl(localStorage.getItem('vds.aiBaseUrl') || '')
+    setAiModel(localStorage.getItem('vds.aiModel') || '')
+  }, [])
+
+  useEffect(() => {
+    if (aiBaseUrl.trim()) localStorage.setItem('vds.aiBaseUrl', aiBaseUrl.trim())
+    else localStorage.removeItem('vds.aiBaseUrl')
+  }, [aiBaseUrl])
+
+  useEffect(() => {
+    if (aiModel.trim()) localStorage.setItem('vds.aiModel', aiModel.trim())
+    else localStorage.removeItem('vds.aiModel')
+  }, [aiModel])
 
   const handleGenerate = async () => {
     if (!canGenerate) return
@@ -50,6 +69,11 @@ export default function AIProcessor() {
         videoId,
         requirement,
         sessionId,
+        aiConfig: {
+          baseUrl: aiBaseUrl.trim(),
+          model: aiModel.trim(),
+          apiKey: aiApiKey.trim(),
+        },
         frames: frames.map(f => ({
           frameId: f.frameId,
           timestamp: f.timestamp,
@@ -73,45 +97,100 @@ export default function AIProcessor() {
 
   return (
     <div className='space-y-3'>
+      <div className='rounded-2xl border border-ink-900/8 bg-paper-100/60 p-3'>
+        <button
+          type='button'
+          onClick={() => setShowModelConfig(v => !v)}
+          className='flex w-full items-center justify-between text-left'
+        >
+          <span>
+            <span className='eyebrow block'>视觉模型配置</span>
+            <span className='mt-1 block text-xs text-ink-400'>
+              {aiModel.trim() || '使用后端默认模型'}
+            </span>
+          </span>
+          <span className='rounded-full border border-ink-900/10 px-2.5 py-1 text-xs text-ink-500'>
+            {showModelConfig ? '收起' : '配置'}
+          </span>
+        </button>
+
+        {showModelConfig && (
+          <div className='mt-3 space-y-2 border-t border-ink-900/8 pt-3'>
+            <label className='block'>
+              <span className='mb-1 block text-xs text-ink-500'>Base URL</span>
+              <input
+                value={aiBaseUrl}
+                onChange={e => setAiBaseUrl(e.target.value)}
+                placeholder='https://dashscope.aliyuncs.com/compatible-mode/v1'
+                className='w-full rounded-xl border border-ink-900/10 bg-paper-50 px-3 py-2 font-mono text-xs text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-umber-400'
+              />
+            </label>
+            <label className='block'>
+              <span className='mb-1 block text-xs text-ink-500'>视觉模型</span>
+              <input
+                value={aiModel}
+                onChange={e => setAiModel(e.target.value)}
+                placeholder='qwen3-vl-plus'
+                className='w-full rounded-xl border border-ink-900/10 bg-paper-50 px-3 py-2 font-mono text-xs text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-umber-400'
+              />
+            </label>
+            <label className='block'>
+              <span className='mb-1 block text-xs text-ink-500'>API Key</span>
+              <input
+                value={aiApiKey}
+                onChange={e => setAiApiKey(e.target.value)}
+                placeholder='不填写则使用后端 .env 的 AI_API_KEY'
+                type='password'
+                autoComplete='off'
+                className='w-full rounded-xl border border-ink-900/10 bg-paper-50 px-3 py-2 font-mono text-xs text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-umber-400'
+              />
+            </label>
+            <p className='text-[11px] leading-relaxed text-ink-400'>
+              Base URL 和模型名会保存在本机浏览器；API Key 只在本次页面会话中保存，并随生成请求发送到本地后端。
+            </p>
+          </div>
+        )}
+      </div>
+
       <button
         onClick={handleGenerate}
         disabled={!canGenerate}
-        className={`w-full py-3 rounded-xl font-semibold text-base transition-all
+        className={`w-full rounded-2xl py-3.5 text-base font-semibold transition-all
           ${canGenerate
-            ? 'bg-blue-600 hover:bg-blue-500 text-white cursor-pointer shadow-lg shadow-blue-900/50'
-            : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}
+            ? 'cursor-pointer bg-ink-900 text-paper-50 shadow-soft hover:-translate-y-0.5 hover:bg-umber-600 hover:shadow-ember-glow'
+            : 'cursor-not-allowed bg-paper-200/70 text-ink-400'}`}
       >
         {isGenerating ? (
           <span className='flex items-center justify-center gap-2'>
             <span className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
             AI 正在分析...
           </span>
-        ) : '🤖 生成 Skill'}
+        ) : '生成 Skill'}
       </button>
 
       {!frames.length && (
-        <p className='text-slate-500 text-xs text-center'>请先提取帧</p>
+        <p className='text-center text-xs text-ink-400'>请先提取帧</p>
       )}
       {frames.length > 0 && !requirement.trim() && (
-        <p className='text-slate-500 text-xs text-center'>请填写用户诉求</p>
+        <p className='text-center text-xs text-ink-400'>请填写用户诉求</p>
       )}
 
       {/* 日志输出区 */}
       {(logs.length > 0 || isGenerating) && (
-        <div className='bg-slate-900 border border-slate-700 rounded-lg p-3 max-h-48 overflow-y-auto space-y-1'>
+        <div className='max-h-48 space-y-1 overflow-y-auto rounded-2xl border border-ink-900/10 bg-ink-900 p-3'>
           {logs.map((line, i) => (
-            <div key={i} className='text-xs text-slate-300 font-mono leading-relaxed'>
+            <div key={i} className='font-mono text-xs leading-relaxed text-paper-200'>
               {line}
             </div>
           ))}
           {isGenerating && (
-            <div className='text-xs text-slate-500 font-mono animate-pulse'>▌</div>
+            <div className='font-mono text-xs text-paper-400 animate-pulse'>▌</div>
           )}
         </div>
       )}
 
       {error && (
-        <div className='px-3 py-2 bg-red-900/40 border border-red-600/50 rounded-lg text-red-300 text-sm'>
+        <div className='rounded-xl border border-clay-500/30 bg-clay-500/10 px-3 py-2 text-sm text-clay-700'>
           {error}
         </div>
       )}

@@ -24,6 +24,7 @@ export default function PlaygroundPage() {
   const activeTab = useAppStore(s => s.activeTab)
   const setActiveTab = useAppStore(s => s.setActiveTab)
   const addFrames = useAppStore(s => s.addFrames)
+  const frames = useAppStore(s => s.frames)
   const skillId = useAppStore(s => s.skillId)
   const setVideo = useAppStore(s => s.setVideo)
   const reset = useAppStore(s => s.reset)
@@ -125,8 +126,8 @@ export default function PlaygroundPage() {
           {/* Tabs */}
           <div className='ml-auto inline-flex rounded-full bg-paper-200/70 p-1 text-[13px]'>
             {[
-              { id: 'annotate', label: '标注帧', disabled: videoId === 'history' },
-              { id: 'skill', label: 'Skill 编辑器', badge: !!skillId },
+              { id: 'annotate', label: 'Skill 生成', disabled: videoId === 'history' },
+              { id: 'skill', label: 'Skill 仓库', badge: !!skillId },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -153,60 +154,85 @@ export default function PlaygroundPage() {
             <EmptyUploadHint onClick={() => fileInputRef.current?.click()} navigate={navigate}
               setVideo={setVideo} setActiveTab={setActiveTab} addFrames={addFrames} />
           ) : (
-            <div className='flex-1 flex gap-5 px-6 py-5 overflow-hidden'>
-              <div className='flex-1 flex flex-col gap-4 min-w-0'>
-                <div className='card-paper p-3'>
+            <div className='flex-1 grid grid-cols-[minmax(0,1fr)_340px] gap-5 px-6 py-5 overflow-hidden'>
+              <div className='flex min-w-0 flex-col gap-4'>
+                <div className='card-paper overflow-hidden p-3 shadow-lift'>
+                  <div className='mb-3 flex items-center justify-between px-1'>
+                    <div>
+                      <div className='eyebrow'>Source · 操作视频</div>
+                      <div className='mt-1 text-xs text-ink-400'>播放、定位并截取关键操作瞬间</div>
+                    </div>
+                    <div className='tick-row hidden sm:flex'>
+                      <span>{videoDuration ? `${Math.round(videoDuration)}s` : '0s'}</span>
+                      <span>Local preview</span>
+                    </div>
+                  </div>
                   <VideoPlayer videoId={videoId} duration={videoDuration} onTimeSelect={handleManualCapture} />
                 </div>
 
-                <div className='flex items-center gap-3 px-1'>
-                  <button
-                    onClick={handleAutoExtract}
-                    disabled={extracting}
-                    className='btn-primary disabled:opacity-60'
-                  >
-                    {extracting ? (
-                      <>
-                        <span className='w-3 h-3 rounded-full border-2 border-paper-50/30 border-t-paper-50 animate-spin' />
-                        <span>抽帧中</span>
-                      </>
-                    ) : (
-                      <>
-                        <svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round'>
-                          <path d='M13 2L4.09 12.97 12 13.5l-1 8.5 8.91-10.97L12 10.5l1-8.5z' />
-                        </svg>
-                        <span>自动抽帧</span>
-                      </>
-                    )}
-                  </button>
-                  <div className='flex items-center gap-2 text-ink-500 text-sm'>
-                    <span>每</span>
-                    <input
-                      type='number' min={1} max={60} value={interval}
-                      onChange={e => setInterval(Math.max(1, Math.min(60, Number(e.target.value))))}
-                      className='w-14 bg-paper-50 border border-ink-900/10 rounded-lg px-2 py-1.5 text-ink-900 text-sm text-center outline-none focus:border-umber-500 transition-colors font-mono tabular-nums'
-                    />
-                    <span>秒取一帧</span>
+                <div className='card-paper p-4'>
+                  <div className='mb-3 flex flex-wrap items-center justify-between gap-3'>
+                    <div>
+                      <div className='eyebrow'>Extract · 抽取帧</div>
+                      <div className='mt-1 text-xs text-ink-400'>按固定间隔批量抽帧，或在播放器中截取当前帧</div>
+                    </div>
+                    <div className='flex items-center gap-3'>
+                      <div className='flex items-center gap-2 rounded-full border border-ink-900/10 bg-paper-100/70 px-3 py-2 text-sm text-ink-500'>
+                        <span>每</span>
+                        <input
+                          type='number' min={1} max={60} value={interval}
+                          onChange={e => setInterval(Math.max(1, Math.min(60, Number(e.target.value))))}
+                          className='w-12 bg-transparent text-center font-mono text-ink-900 outline-none tabular-nums'
+                        />
+                        <span>秒</span>
+                      </div>
+                      <button
+                        onClick={handleAutoExtract}
+                        disabled={extracting}
+                        className='btn-primary disabled:opacity-60'
+                      >
+                        {extracting ? (
+                          <>
+                            <span className='w-3 h-3 rounded-full border-2 border-paper-50/30 border-t-paper-50 animate-spin' />
+                            <span>抽帧中</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round'>
+                              <path d='M13 2L4.09 12.97 12 13.5l-1 8.5 8.91-10.97L12 10.5l1-8.5z' />
+                            </svg>
+                            <span>自动抽帧</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                  {extractError && <span className='text-clay-500 text-sm'>{extractError}</span>}
-                </div>
-
-                <div className='card-paper p-4 min-w-0 overflow-hidden'>
-                  <div className='eyebrow mb-3'>Timeline · 帧序</div>
+                  {extractError && <div className='mb-3 rounded-xl border border-clay-500/20 bg-clay-500/10 px-3 py-2 text-sm text-clay-500'>{extractError}</div>}
                   <FrameTimeline />
                 </div>
 
                 <div className='flex-1 card-paper p-4 min-h-0 flex flex-col'>
-                  <div className='eyebrow mb-3'>Canvas · 标注</div>
+                  <div className='mb-3 flex items-center justify-between'>
+                    <div>
+                      <div className='eyebrow'>Canvas · 标注</div>
+                      <div className='mt-1 text-xs text-ink-400'>用箭头、矩形和文字把视觉证据讲清楚</div>
+                    </div>
+                  </div>
                   <div className='flex-1 min-h-0'>
                     <FrameAnnotator />
                   </div>
                 </div>
               </div>
 
-              <div className='w-80 flex flex-col gap-4 overflow-y-auto scrollbar-thin pr-1'>
+              <aside className='flex min-h-0 flex-col gap-4 overflow-y-auto pr-1 scrollbar-thin'>
                 <div className='card-paper p-4'>
-                  <div className='eyebrow mb-3'>Frames · 帧列表</div>
+                  <div className='mb-3 flex items-end justify-between'>
+                    <div>
+                      <div className='eyebrow'>Frames · 帧列表</div>
+                      <div className='mt-1 text-xs text-ink-400'>排序、描述每个关键帧</div>
+                    </div>
+                    <span className='font-mono text-[11px] text-ink-400'>{frames.length}</span>
+                  </div>
                   <FrameList />
                 </div>
                 <div className='card-paper p-4'>
@@ -216,7 +242,7 @@ export default function PlaygroundPage() {
                   <AIProcessor />
                 </div>
                 <ArchiveBrowser />
-              </div>
+              </aside>
             </div>
           )
         ) : (
@@ -250,7 +276,7 @@ export default function PlaygroundPage() {
                       还没有 Skill
                     </div>
                     <p className='text-ink-500 text-sm leading-relaxed'>
-                      请先在「标注帧」页生成 Skill，或从左侧 Skill 仓库选择已有的。
+                      请先在「Skill 生成」页生成 Skill，或从左侧 Skill 仓库选择已有的。
                     </p>
                   </div>
                 </div>

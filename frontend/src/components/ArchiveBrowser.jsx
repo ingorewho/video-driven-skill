@@ -80,9 +80,9 @@ export default function ArchiveBrowser({ onSelectVideo, onSelectFrames }) {
   }
 
   return (
-    <div className="bg-slate-800/50 rounded-xl p-4 space-y-3">
+    <div className="card-paper space-y-3 p-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-slate-400 text-xs uppercase tracking-wider">归档资源</h3>
+        <h3 className="eyebrow">归档资源</h3>
         <div className="flex gap-1">
           {['videos', 'frames'].map(tab => (
             <button
@@ -92,10 +92,10 @@ export default function ArchiveBrowser({ onSelectVideo, onSelectFrames }) {
                 setSelectedVideo(null)
                 setVideoFrames([])
               }}
-              className={`px-2 py-1 rounded text-xs transition-colors ${
+              className={`rounded-full px-2.5 py-1 text-xs transition-colors ${
                 activeTab === tab 
-                  ? 'bg-slate-600 text-white' 
-                  : 'text-slate-400 hover:bg-slate-700'
+                  ? 'bg-ink-900 text-paper-50' 
+                  : 'text-ink-400 hover:bg-paper-200 hover:text-ink-900'
               }`}
             >
               {tab === 'videos' ? '视频' : '帧'}
@@ -105,33 +105,33 @@ export default function ArchiveBrowser({ onSelectVideo, onSelectFrames }) {
       </div>
 
       {loading ? (
-        <div className="text-center py-4 text-slate-500 text-xs">加载中...</div>
+        <div className="py-4 text-center text-xs text-ink-400">加载中...</div>
       ) : activeTab === 'videos' ? (
-        <div className="space-y-2 max-h-64 overflow-y-auto">
+        <div className="max-h-64 space-y-2 overflow-y-auto scrollbar-thin">
           {videos.length === 0 ? (
-            <div className="text-center py-4 text-slate-500 text-xs">暂无保存的视频</div>
+            <div className="rounded-2xl border border-dashed border-ink-900/12 bg-paper-100/60 py-5 text-center text-xs text-ink-400">暂无保存的视频</div>
           ) : (
             videos.map(video => (
-              <div key={video.id} className={`group flex items-center gap-3 p-2 rounded-lg cursor-pointer ${
-                selectedVideo?.id === video.id ? 'bg-blue-900/30 border border-blue-700' : 'bg-slate-900/50'
+              <div key={video.id} className={`group flex cursor-pointer items-center gap-3 rounded-2xl border p-2 transition-all ${
+                selectedVideo?.id === video.id ? 'border-umber-400 bg-umber-50/70' : 'border-ink-900/8 bg-paper-100/50 hover:bg-paper-50'
               }`}>
-                <div className="w-10 h-10 bg-slate-700 rounded flex items-center justify-center text-lg">📹</div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-paper-200 text-sm text-ink-500">VID</div>
                 <div className="flex-1 min-w-0" onClick={() => handleSelectVideo(video)}>
-                  <div className="text-slate-300 text-xs truncate">{video.filename}</div>
-                  <div className="text-slate-500 text-[10px]">
+                  <div className="truncate text-xs text-ink-700">{video.filename}</div>
+                  <div className="text-[10px] text-ink-400">
                     {video.duration}s · {formatSize(video.fileSize)} · {video.frameCount || 0}帧
                   </div>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => handleSelectVideo(video)}
-                    className="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded"
+                    className="rounded-full bg-ink-900 px-2 py-1 text-xs text-paper-50 hover:bg-umber-600"
                   >
                     使用
                   </button>
                   <button
                     onClick={() => handleDeleteVideo(video.id)}
-                    className="px-2 py-1 bg-red-600 hover:bg-red-500 text-white text-xs rounded"
+                    className="rounded-full bg-clay-500/90 px-2 py-1 text-xs text-paper-50 hover:bg-clay-500"
                   >
                     删除
                   </button>
@@ -142,13 +142,13 @@ export default function ArchiveBrowser({ onSelectVideo, onSelectFrames }) {
           
           {/* 显示选中视频的关联帧 */}
           {selectedVideo && videoFrames.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-slate-700">
-              <div className="text-xs text-slate-400 mb-2">
+            <div className="mt-3 border-t border-ink-900/10 pt-3">
+              <div className="mb-2 text-xs text-ink-400">
                 关联帧 ({videoFrames.length})
               </div>
               <div className="grid grid-cols-4 gap-1">
                 {videoFrames.map(frame => (
-                  <div key={frame.id} className="aspect-video bg-slate-900 rounded overflow-hidden">
+                  <div key={frame.id} className="aspect-video overflow-hidden rounded-lg bg-paper-200">
                     {frame.base64Preview && (
                       <img
                         src={`data:image/jpeg;base64,${frame.base64Preview}`}
@@ -161,7 +161,7 @@ export default function ArchiveBrowser({ onSelectVideo, onSelectFrames }) {
               </div>
               <button
                 onClick={() => onSelectFrames?.(videoFrames)}
-                className="mt-2 w-full py-1.5 bg-green-600 hover:bg-green-500 text-white text-xs rounded"
+                className="mt-2 w-full rounded-full bg-sage-700 py-1.5 text-xs text-paper-50 hover:bg-sage-500"
               >
                 使用全部 {videoFrames.length} 个帧
               </button>
@@ -169,12 +169,12 @@ export default function ArchiveBrowser({ onSelectVideo, onSelectFrames }) {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+        <div className="grid max-h-64 grid-cols-3 gap-2 overflow-y-auto scrollbar-thin">
           {frames.length === 0 ? (
-            <div className="col-span-3 text-center py-4 text-slate-500 text-xs">暂无保存的帧</div>
+            <div className="col-span-3 rounded-2xl border border-dashed border-ink-900/12 bg-paper-100/60 py-5 text-center text-xs text-ink-400">暂无保存的帧</div>
           ) : (
             frames.map(frame => (
-              <div key={frame.id} className="group relative aspect-video bg-slate-900 rounded-lg overflow-hidden">
+              <div key={frame.id} className="group relative aspect-video overflow-hidden rounded-xl bg-paper-200">
                 {frame.base64Preview && (
                   <img
                     src={`data:image/jpeg;base64,${frame.base64Preview}`}
@@ -182,22 +182,22 @@ export default function ArchiveBrowser({ onSelectVideo, onSelectFrames }) {
                     className="w-full h-full object-cover"
                   />
                 )}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                <div className="absolute inset-0 flex items-center justify-center gap-1 bg-ink-900/65 opacity-0 transition-opacity group-hover:opacity-100">
                   <button
                     onClick={() => onSelectFrames?.([frame])}
-                    className="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded"
+                    className="rounded-full bg-paper-50 px-2 py-1 text-xs text-ink-900"
                   >
                     使用
                   </button>
                   <button
                     onClick={() => handleDeleteFrame(frame.id)}
-                    className="px-2 py-1 bg-red-600 hover:bg-red-500 text-white text-xs rounded"
+                    className="rounded-full bg-clay-500 px-2 py-1 text-xs text-paper-50"
                   >
                     删除
                   </button>
                 </div>
                 {frame.description && (
-                  <div className="absolute bottom-0 left-0 right-0 px-1 py-0.5 bg-black/70 text-[10px] text-white truncate">
+                  <div className="absolute bottom-0 left-0 right-0 truncate bg-ink-900/70 px-1 py-0.5 text-[10px] text-paper-50">
                     {frame.description}
                   </div>
                 )}

@@ -15,7 +15,7 @@ export default function FrameTimeline() {
 
   if (frames.length === 0) {
     return (
-      <div className='text-center py-4 text-slate-500 text-sm'>
+      <div className='rounded-2xl border border-dashed border-ink-900/12 bg-paper-100/60 py-6 text-center text-sm text-ink-400'>
         暂无帧，请点击「自动抽帧」或「截取当前帧」
       </div>
     )
@@ -86,23 +86,23 @@ export default function FrameTimeline() {
   }
 
   return (
-    <div className='flex gap-2 overflow-x-auto pb-2 scrollbar-thin min-w-0' style={{ maxWidth: '100%' }}>
+    <div className='flex min-w-0 gap-3 overflow-x-auto pb-2 scrollbar-thin' style={{ maxWidth: '100%' }}>
       {frames.map((frame, index) => (
         <div
           key={frame.frameId}
           onDragOver={(e) => handleDragOver(e, index)}
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, index)}
-          className={`group relative flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all
-            ${selectedFrameId === frame.frameId ? 'border-blue-500 scale-105' : 'border-transparent hover:border-slate-500'}
-            ${dragOverIndex === index ? 'ring-2 ring-green-500 ring-offset-2 ring-offset-slate-900' : ''}
+          className={`group relative flex-shrink-0 overflow-hidden rounded-2xl border bg-paper-50 p-1 shadow-soft transition-all
+            ${selectedFrameId === frame.frameId ? 'border-umber-400 -translate-y-0.5 shadow-lift' : 'border-ink-900/10 hover:border-ink-900/20'}
+            ${dragOverIndex === index ? 'ring-2 ring-umber-400 ring-offset-2 ring-offset-paper-50' : ''}
             ${dragItemRef.current === index ? 'opacity-50' : ''}`}
           onClick={() => setSelectedFrameId(frame.frameId)}
         >
           {/* 左移按钮 */}
           {index > 0 && (
             <button
-              className='absolute left-0.5 top-1/2 -translate-y-1/2 w-5 h-5 bg-slate-800/80 hover:bg-blue-600/80 rounded text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10'
+              className='absolute left-1.5 top-1/2 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-paper-50/90 text-xs text-ink-700 opacity-0 shadow-soft ring-1 ring-ink-900/10 transition-opacity hover:bg-umber-50 group-hover:opacity-100'
               onClick={(e) => handleMove(e, frame.frameId, 'left')}
               title='左移'
             >
@@ -113,7 +113,7 @@ export default function FrameTimeline() {
           {/* 右移按钮 */}
           {index < frames.length - 1 && (
             <button
-              className='absolute right-0.5 top-1/2 -translate-y-1/2 w-5 h-5 bg-slate-800/80 hover:bg-blue-600/80 rounded text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10'
+              className='absolute right-1.5 top-1/2 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-paper-50/90 text-xs text-ink-700 opacity-0 shadow-soft ring-1 ring-ink-900/10 transition-opacity hover:bg-umber-50 group-hover:opacity-100'
               onClick={(e) => handleMove(e, frame.frameId, 'right')}
               title='右移'
             >
@@ -124,7 +124,7 @@ export default function FrameTimeline() {
           <img
             src={`data:image/jpeg;base64,${frame.base64Image}`}
             alt={`Frame at ${fmt(frame.timestamp)}`}
-            className='w-24 h-14 object-cover pointer-events-none'
+            className='h-16 w-28 rounded-xl object-cover pointer-events-none'
             draggable={false}
           />
           
@@ -133,26 +133,26 @@ export default function FrameTimeline() {
             draggable
             onDragStart={(e) => handleDragStart(e, index)}
             onDragEnd={handleDragEnd}
-            className='absolute top-0.5 left-0.5 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded cursor-move hover:bg-blue-600/80 z-20'
+            className='absolute left-2 top-2 z-20 cursor-move rounded-full bg-ink-900/80 px-2 py-0.5 font-mono text-[10px] text-paper-50 shadow-soft hover:bg-umber-600'
             title={`第 ${index + 1} 帧 - 拖拽可调整顺序`}
           >
             {index + 1}
           </div>
 
-          <div className='absolute bottom-0 left-0 right-0 bg-black/70 text-xs text-white text-center py-0.5'>
+          <div className='absolute bottom-1 left-1 right-1 rounded-b-xl bg-ink-900/70 py-0.5 text-center font-mono text-[10px] text-paper-50 backdrop-blur-sm'>
             {fmt(frame.timestamp)}
           </div>
 
           {/* 删除按钮 */}
           <button
-            className={`absolute top-0.5 right-0.5 w-5 h-5 bg-red-600/80 hover:bg-red-500 rounded text-white text-xs flex items-center justify-center transition-opacity z-10
+            className={`absolute right-2 top-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-clay-500/85 text-xs text-paper-50 transition-opacity hover:bg-clay-500
               ${deletingId === frame.frameId ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
             onClick={(e) => handleDelete(e, frame.frameId, index)}
             disabled={deletingId === frame.frameId}
             title='删除'
           >
             {deletingId === frame.frameId ? (
-              <span className='w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin' />
+              <span className='w-3 h-3 border-2 border-paper-50/30 border-t-paper-50 rounded-full animate-spin' />
             ) : (
               '×'
             )}
@@ -160,7 +160,7 @@ export default function FrameTimeline() {
 
           {/* 有描述标记 */}
           {frame.description && (
-            <div className='absolute bottom-5 left-0.5 w-2 h-2 bg-green-500 rounded-full' title='已添加描述' />
+            <div className='absolute bottom-6 left-2 h-2 w-2 rounded-full bg-sage-500 ring-2 ring-paper-50' title='已添加描述' />
           )}
         </div>
       ))}

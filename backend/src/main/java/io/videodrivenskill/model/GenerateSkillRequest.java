@@ -9,6 +9,7 @@ public class GenerateSkillRequest {
   private List<AnnotatedFrame> frames;
   private String requirement;
   private String sessionId; // for SSE log streaming
+  private AiConfig aiConfig; // optional per-run visual model override
 
   @Data
   public static class AnnotatedFrame {
@@ -17,5 +18,12 @@ public class GenerateSkillRequest {
     private String base64Image;
     private String description; // user annotation text
     private String annotationJson; // Fabric.js annotation JSON
+  }
+
+  @Data
+  public static class AiConfig {
+    private String apiKey;
+    private String baseUrl;
+    private String model;
   }
 }

@@ -50,15 +50,15 @@ export default function RequirementHistorySelector() {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-slate-400 text-xs">用户诉求</label>
+        <label className="eyebrow">用户诉求</label>
         <div className="flex gap-2">
           {requirement.trim() && (
             <button
               onClick={handleSaveCurrent}
               disabled={saving}
-              className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50"
+              className="text-xs text-umber-600 hover:text-umber-700 disabled:opacity-50"
             >
-              {saving ? '保存中...' : '💾 保存'}
+              {saving ? '保存中...' : '保存'}
             </button>
           )}
           <button
@@ -66,9 +66,9 @@ export default function RequirementHistorySelector() {
               loadHistory()
               setShowSelector(!showSelector)
             }}
-            className="text-xs text-slate-400 hover:text-slate-300"
+            className="text-xs text-ink-400 hover:text-ink-700"
           >
-            📜 历史 ({history.length})
+            历史 ({history.length})
           </button>
         </div>
       </div>
@@ -77,31 +77,31 @@ export default function RequirementHistorySelector() {
         value={requirement}
         onChange={e => setRequirement(e.target.value)}
         placeholder="描述你希望 AI 帮你完成的自动化任务..."
-        className="w-full h-24 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:border-blue-500 outline-none resize-none"
+        className="h-28 w-full resize-none rounded-2xl border border-ink-900/10 bg-paper-100/70 px-3 py-2 text-sm text-ink-900 outline-none transition-colors placeholder:text-ink-400 focus:border-umber-400"
       />
 
       {showSelector && (
-        <div className="bg-slate-800 border border-slate-700 rounded-lg max-h-48 overflow-y-auto">
+        <div className="max-h-48 overflow-y-auto rounded-2xl border border-ink-900/10 bg-paper-50 shadow-soft">
           {history.length === 0 ? (
-            <div className="p-3 text-slate-500 text-xs text-center">暂无历史诉求</div>
+            <div className="p-3 text-center text-xs text-ink-400">暂无历史诉求</div>
           ) : (
             history.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleSelect(item)}
-                className="w-full px-3 py-2 text-left hover:bg-slate-700 transition-colors border-b border-slate-700/50 last:border-0"
+                className="w-full border-b border-ink-900/6 px-3 py-2 text-left transition-colors last:border-0 hover:bg-paper-100"
               >
-                <div className="text-slate-300 text-xs line-clamp-2">{item.content}</div>
+                <div className="line-clamp-2 text-xs text-ink-700">{item.content}</div>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-slate-500 text-[10px]">
+                  <span className="text-[10px] text-ink-400">
                     {item.platform}
                   </span>
                   {item.useCount > 0 && (
-                    <span className="text-slate-500 text-[10px]">
+                    <span className="text-[10px] text-ink-400">
                       使用 {item.useCount} 次
                     </span>
                   )}
-                  <span className="text-slate-600 text-[10px] ml-auto">
+                  <span className="ml-auto text-[10px] text-ink-400">
                     {new Date(item.lastUsedAt || item.createdAt).toLocaleDateString()}
                   </span>
                 </div>
