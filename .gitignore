@@ -43,3 +43,4 @@ skill-run-*/
 # Local assistant/tooling caches
 .claude/
 .codex/
+.workbuddy/
