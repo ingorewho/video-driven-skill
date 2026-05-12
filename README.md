@@ -103,7 +103,18 @@ brew install ffmpeg
 
 # Ubuntu / Debian
 sudo apt-get update && sudo apt-get install ffmpeg
+
+# Windows (winget — open a new terminal after install so PATH updates)
+winget install Gyan.FFmpeg
+
+# Windows (Chocolatey, run PowerShell or CMD as Administrator)
+choco install ffmpeg
+
+# Windows (Scoop)
+scoop install ffmpeg
 ```
+
+On Windows, if you install manually from [ffmpeg.org](https://ffmpeg.org/download.html#build-windows), unpack the archive and add the `bin` folder containing `ffmpeg.exe` to your user or system **PATH**, then confirm with `ffmpeg -version` in a new terminal.
 
 ### 1. Clone the Repository
 
