@@ -1,3 +1,7 @@
+<p align="center">
+  <strong>English</strong> · <a href="architecture.zh-CN.md">简体中文</a>
+</p>
+
 # Architecture
 
 Video Driven Skill is split into a Spring Boot backend and a React frontend. The two services communicate through REST APIs for ordinary operations and WebSocket/SSE channels for long-running generation and execution logs.

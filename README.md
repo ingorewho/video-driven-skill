@@ -1,4 +1,8 @@
 <p align="center">
+  <strong>English</strong> · <a href="README.zh-CN.md">简体中文</a>
+</p>
+
+<p align="center">
   <img src="docs/images/homepage.png" alt="Video Driven Skill Homepage" width="720">
 </p>
 
@@ -14,11 +18,11 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Java-17-orange?logo=openjdk&logoColor=white" alt="Java 17">
-  <img src="https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?logo=spring&logoColor=white" alt="Spring Boot">
-  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" alt="React">
-  <img src="https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite&logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/Spring_Boot-3.2-6DB33F?logo=spring&logoColor=white" alt="Spring Boot">
+  <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white" alt="React">
+  <img src="https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white" alt="Vite">
   <img src="https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white" alt="SQLite">
-  <img src="https://img.shields.io/badge/FFmpeg-7-007808?logo=ffmpeg&logoColor=white" alt="FFmpeg">
+  <img src="https://img.shields.io/badge/FFmpeg-007808?logo=ffmpeg&logoColor=white" alt="FFmpeg">
   <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
 </p>
 
@@ -140,20 +144,23 @@ export AI_MODEL="gpt-4o-mini"
 
 ### 3. Start the Application
 
-Using the helper script:
+**On macOS / Linux**, you can use the helper script at the repo root (requires `mvn`, `node`, `npm`, `curl`, `lsof`, `ffmpeg`, etc. — see preflight checks in `start.sh`):
 
 ```bash
+chmod +x ./start.sh
 ./start.sh
 ```
 
-Or start services manually:
+Common subcommands: `./start.sh status`, `./start.sh stop`, `./start.sh restart`, `./start.sh logs` (optionally `backend` or `frontend`).
+
+**Manual start** (works on all platforms, including Windows):
 
 ```bash
 # Backend (port 8080)
 cd backend
 AI_API_KEY="your_api_key" mvn spring-boot:run
 
-# Frontend (port 3000)
+# Frontend (port 3000 — separate terminal)
 cd frontend
 npm install
 npm run dev
@@ -189,14 +196,14 @@ video-driven-skill/
 ├── frontend/                # React + Vite — studio UI
 ├── docs/                    # Documentation & screenshots
 ├── scripts/
-│   └── kill-midscene.sh  # Optional cleanup helper
-├── start.sh              # Local development helper
+│   └── kill-midscene.sh     # Optional cleanup helper
+├── start.sh                 # Local development helper (Unix)
 ```
 
 ### Backend (Spring Boot / Java 17)
 
 | Module | Responsibility |
-|---|---|
+|--------|----------------|
 | `controller/` | REST API & WebSocket entry points |
 | `service/VideoService` | Video upload, FFmpeg frame extraction, streaming |
 | `service/AIService` | Prompt construction & multimodal API calls |
@@ -205,7 +212,8 @@ video-driven-skill/
 | `service/KnowledgeService` | Per-skill reference files & manifest |
 | `model/` & `repository/` | SQLite-backed domain entities |
 
-Runtime data lives under `~/video-driven-skill/`:
+Runtime data lives under `~/video-driven-skill/` by default (override with `VIDEO_DRIVEN_SKILL_HOME`; on Windows, the same folder name under your user profile):
+
 - `uploads/` — uploaded videos & extracted frames
 - `skills/` — generated skill source files
 - `archives/` — reusable video/frame/requirement resources
@@ -214,7 +222,7 @@ Runtime data lives under `~/video-driven-skill/`:
 ### Frontend (React + Vite + Tailwind CSS)
 
 | Component | Responsibility |
-|---|---|
+|-----------|----------------|
 | `HomePage` | Upload, import, and recent resources |
 | `PlaygroundPage` | Frame annotation & skill workspace |
 | `FrameTimeline` / `FrameAnnotator` / `FrameList` | Visual evidence collection |
@@ -241,7 +249,7 @@ For a deeper walkthrough, see [docs/architecture.md](docs/architecture.md).
 ## API Overview
 
 | Method | Path | Purpose |
-|---|---|---|
+|--------|------|---------|
 | `POST` | `/api/videos/upload` | Upload a video |
 | `POST` | `/api/videos/{id}/frames/auto` | Auto-extract frames |
 | `POST` | `/api/videos/{id}/frames/manual` | Manual frame capture |
@@ -282,7 +290,7 @@ cd backend && mvn -q -DskipTests compile
 # Frontend build
 cd frontend && npm run build
 
-# Check service status
+# Check service status (Unix + start.sh)
 ./start.sh status
 
 # Stop services

@@ -1,0 +1,310 @@
+<p align="center">
+  <a href="README.md">English</a> · <strong>简体中文</strong>
+</p>
+
+<p align="center">
+  <img src="docs/images/homepage.png" alt="Video Driven Skill 首页" width="720">
+</p>
+
+<h1 align="center">Video Driven Skill</h1>
+
+<p align="center">
+  <strong>将操作录屏转化为可复用的自动化技能。</strong>
+</p>
+
+<p align="center">
+  <a href="#快速开始">快速开始</a> · <a href="#功能特性">功能特性</a> · <a href="#界面截图">界面截图</a> · <a href="#架构说明">架构说明</a> · <a href="#许可证">许可证</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-17-orange?logo=openjdk&logoColor=white" alt="Java 17">
+  <img src="https://img.shields.io/badge/Spring_Boot-3.2-6DB33F?logo=spring&logoColor=white" alt="Spring Boot">
+  <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white" alt="React">
+  <img src="https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white" alt="SQLite">
+  <img src="https://img.shields.io/badge/FFmpeg-007808?logo=ffmpeg&logoColor=white" alt="FFmpeg">
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
+</p>
+
+---
+
+## 项目简介
+
+Video Driven Skill 是一套开源的**自动化工作室**：把**屏幕录屏**变成**可运行、可编辑的技能包**。上传视频 → 抽取关键帧 → 标注意图 → 多模态 AI 起草技能 → 再审阅、运行、版本化、归档与导出。
+
+适合希望自动化从**真实操作方式**出发，而不是从空白脚本开始的团队与个人。
+
+> **工作流：** 录制流程 → 挑选关键画面 → 标注意图 → 生成技能 → 审阅与运行 → 导出与部署
+
+---
+
+## 功能特性
+
+- **视频到技能流水线** — 上传操作录屏，自动转换为包含 `SKILL.md`、`package.json`、脚本与变量说明的结构化技能包。
+- **智能抽帧** — 通过 FFmpeg 自动抽关键帧，也可手动截取重要时刻。
+- **可视化标注** — 在画面上用箭头、文字等标注，向 AI 明确「要做什么」。
+- **多模态 AI 生成** — 对接任意 **OpenAI 兼容** 的视觉模型，生成浏览器、Android、iOS 或桌面端等自动化代码。
+- **浏览器内代码编辑** — 语法高亮、变量管理，就地审阅与修改生成结果。
+- **增量重新生成** — 支持整包重生或选中代码片段重生，并可对比版本差异。
+- **本地技能运行器** — 本地执行技能，流式日志，可选截图。
+- **技能仓库** — 浏览、搜索、导入、导出（ZIP）、拖拽排序管理技能集合。
+- **知识库** — 为每个技能附加参考图、文档与笔记，丰富上下文。
+- **归档系统** — 保留视频、帧与需求素材，便于日后基于历史物料构建新技能。
+
+---
+
+## 界面截图
+
+### 首页总览
+
+上传视频、导入技能、查看最近资源的入口。
+
+<p align="center">
+  <img src="docs/images/homepage.png" alt="首页总览" width="720">
+</p>
+
+### 抽帧
+
+对上传视频自动抽取关键帧，或手动选择关键时刻。
+
+<p align="center">
+  <img src="docs/images/frame-extraction.png" alt="抽帧" width="720">
+</p>
+
+### AI 生成技能
+
+标注画面意图、配置生成参数，由 AI 产出完整自动化技能。
+
+<p align="center">
+  <img src="docs/images/skill-generation.png" alt="AI 生成技能" width="720">
+</p>
+
+### 技能仓库
+
+在同一处浏览、整理与管理所有已生成技能。
+
+<p align="center">
+  <img src="docs/images/skill-repository.png" alt="技能仓库" width="720">
+</p>
+
+---
+
+## 快速开始
+
+### 环境要求
+
+- **Java 17+**
+- **Maven 3.8+**
+- **Node.js 18+** 与 **npm 9+**
+- **FFmpeg**（已加入 `PATH`）
+- 可用的 **OpenAI 兼容多模态 API** 密钥
+
+安装 FFmpeg 示例：
+
+```bash
+# macOS
+brew install ffmpeg
+
+# Ubuntu / Debian
+sudo apt-get update && sudo apt-get install ffmpeg
+
+# Windows（winget，安装后请新开终端以使 PATH 生效）
+winget install Gyan.FFmpeg
+
+# Windows（Chocolatey，管理员 PowerShell 或 CMD）
+choco install ffmpeg
+
+# Windows（Scoop）
+scoop install ffmpeg
+```
+
+若在 Windows 上从 [ffmpeg.org](https://ffmpeg.org/download.html#build-windows) 手动下载，请将包含 `ffmpeg.exe` 的 `bin` 目录加入用户或系统 **PATH**，并在新终端中执行 `ffmpeg -version` 确认。
+
+### 1. 克隆仓库
+
+```bash
+git clone https://github.com/ingorewho/video-driven-skill.git
+cd video-driven-skill
+```
+
+### 2. 配置环境
+
+```bash
+cp .env.example .env
+```
+
+编辑 `.env`，填入 API 等信息：
+
+```bash
+export AI_API_KEY="你的_API_密钥"
+# 可选覆盖项：
+export AI_BASE_URL="https://api.openai.com/v1"
+export AI_MODEL="gpt-4o-mini"
+```
+
+### 3. 启动应用
+
+**在 macOS / Linux 上**可使用项目根目录脚本（需已安装 `mvn`、`node`、`npm`、`curl`、`lsof`、`ffmpeg` 等，详见 `start.sh` 内预检）：
+
+```bash
+chmod +x ./start.sh
+./start.sh
+```
+
+常用子命令：`./start.sh status`、`./start.sh stop`、`./start.sh restart`、`./start.sh logs`（可加 `backend` / `frontend`）。
+
+**手动启动**（全平台通用，含 Windows）：
+
+```bash
+# 后端（默认端口 8080）
+cd backend
+AI_API_KEY="你的_api_key" mvn spring-boot:run
+
+# 前端（默认端口 3000，另开终端）
+cd frontend
+npm install
+npm run dev
+```
+
+### 4. 浏览器访问
+
+```
+http://localhost:3000
+```
+
+---
+
+## 典型工作流
+
+1. **上传** — 上传操作录屏（如某业务流程的屏幕录像）。
+2. **抽帧** — 自动抽关键帧或手动截取重要画面。
+3. **标注** — 用箭头、备注等标注意图与修正点。
+4. **描述意图** — 用自然语言说明目标，例如：「从本页收集商品名并导出」。
+5. **生成** — 由多模态模型生成完整技能包。
+6. **审阅与编辑** — 检查代码、调整变量、微调输出。
+7. **运行** — 在本地执行技能并查看流式日志。
+8. **迭代** — 整包重生或局部重生，并对比差异。
+9. **导出与部署** — 打包为 ZIP 或部署到本地技能目录。
+
+---
+
+## 架构说明
+
+```text
+video-driven-skill/
+├── backend/                 # Spring Boot — API、视频处理、AI、技能运行器
+├── frontend/                # React + Vite — 工作室前端
+├── docs/                    # 文档与截图
+├── scripts/
+│   └── kill-midscene.sh     # 可选清理辅助脚本
+├── start.sh                 # 本地开发辅助（Unix）
+```
+
+### 后端（Spring Boot / Java 17）
+
+| 模块 | 职责 |
+|------|------|
+| `controller/` | REST API 与 WebSocket 入口 |
+| `service/VideoService` | 视频上传、FFmpeg 抽帧、流式传输 |
+| `service/AIService` | 提示词构建与多模态 API 调用 |
+| `service/SkillService` | 技能 CRUD、导入导出、版本管理 |
+| `service/SkillRunnerService` | 工作区准备、依赖注入、执行与日志采集 |
+| `service/KnowledgeService` | 每个技能的参考文件与清单 |
+| `model/`、`repository/` | 基于 SQLite 的领域实体与持久化 |
+
+运行时数据默认位于 `~/video-driven-skill/`（可通过环境变量 `VIDEO_DRIVEN_SKILL_HOME` 覆盖；Windows 下对应用户主目录下的同名文件夹）：
+
+- `uploads/` — 上传视频与抽取帧
+- `skills/` — 已生成技能源码
+- `archives/` — 可复用的视频 / 帧 / 需求归档
+- `video-driven-skill.db` — SQLite 数据库
+
+### 前端（React + Vite + Tailwind CSS）
+
+| 组件 | 职责 |
+|------|------|
+| `HomePage` | 上传、导入与最近资源 |
+| `PlaygroundPage` | 帧标注与技能工作区 |
+| `FrameTimeline` / `FrameAnnotator` / `FrameList` | 可视化证据收集 |
+| `AIProcessor` | 生成控制与流式状态 |
+| `SkillList` | 技能仓库与拖拽排序 |
+| `SkillEditor` / `SkillExport` / `SkillRunner` | 审阅、导出与执行 |
+| `RegeneratePanel` / `CodeComparisonView` | 迭代与对比 |
+| `KnowledgeBasePanel` | 每个技能的扩展上下文 |
+
+### 技能包结构
+
+```text
+SKILL.md              # 技能意图、说明与变量文档
+package.json          # 元数据
+variables.json        # 用户可编辑的运行时输入
+scripts/main.js       # 可执行入口
+knowledge/            # 可选参考文件
+```
+
+更细的说明见 [docs/architecture.zh-CN.md](docs/architecture.zh-CN.md)。
+
+---
+
+## API 概览
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| `POST` | `/api/videos/upload` | 上传视频 |
+| `POST` | `/api/videos/{id}/frames/auto` | 自动抽帧 |
+| `POST` | `/api/videos/{id}/frames/manual` | 手动截帧 |
+| `GET` | `/api/videos/{id}/stream` | 流式播放已上传视频 |
+| `GET` | `/api/skills` | 列出全部技能 |
+| `PUT` | `/api/skills/order` | 保存技能排序 |
+| `POST` | `/api/skills/generate` | 生成技能 |
+| `GET` | `/api/skills/{id}` | 读取技能 |
+| `PUT` | `/api/skills/{id}/files` | 更新技能文件 |
+| `GET` | `/api/skills/{id}/export` | 导出为 ZIP |
+| `POST` | `/api/skills/{id}/regenerate` | 生成候选修订版 |
+| `POST` | `/api/skills/{id}/partial-regenerate` | 局部重新生成 |
+| `POST` | `/api/skills/{id}/accept` | 接受候选修订 |
+| `GET` | `/api/skills/{id}/versions` | 列出技能版本 |
+| `POST` | `/api/skills/{id}/deploy` | 本地部署技能 |
+
+---
+
+## 安全与隐私
+
+本仓库面向开源协作做了默认安全处理：
+
+- 不提交任何 API 密钥或凭据。
+- 本地数据库、上传内容、归档、生成技能、日志与构建产物已加入 `.gitignore`。
+- 运行期配置来自环境变量或本地 `.env`。
+- **请勿**将私密录屏、口令、客户数据或生产环境截图上传到不可信的公共实例。
+
+若发现安全问题，请负责任地披露，详见 [SECURITY.md](SECURITY.md)。
+
+---
+
+## 开发说明
+
+```bash
+# 后端编译
+cd backend && mvn -q -DskipTests compile
+
+# 前端构建
+cd frontend && npm run build
+
+# 查看服务状态（需 Unix 环境与 start.sh）
+./start.sh status
+
+# 停止服务
+./start.sh stop
+```
+
+---
+
+## 许可证
+
+本项目采用 **MIT License**，详见 [LICENSE](LICENSE)。
+
+---
+
+<p align="center">
+  由 <strong>Video Driven Skill</strong> 团队用心构建。
+</p>
