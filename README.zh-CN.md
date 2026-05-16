@@ -91,7 +91,22 @@ Video Driven Skill 是一套开源的**自动化工作室**：把**屏幕录屏*
 
 ## 快速开始
 
-### 环境要求
+### 使用 Docker（推荐，无需本机 Java / FFmpeg）
+
+安装 [Docker](https://docs.docker.com/get-docker/) 后，配置 `.env` 并启动：
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+浏览器访问 **http://localhost:3000**。数据保存在 Docker 卷 `app-data` 中。
+
+---
+
+### 从源码运行
+
+#### 环境要求
 
 - **Java 17+**
 - **Maven 3.8+**
@@ -194,6 +209,7 @@ http://localhost:3000
 video-driven-skill/
 ├── backend/                 # Spring Boot — API、视频处理、AI、技能运行器
 ├── frontend/                # React + Vite — 工作室前端
+├── docker-compose.yml       # 一键 Docker 部署
 ├── docs/                    # 文档与截图
 ├── scripts/
 │   └── kill-midscene.sh     # 可选清理辅助脚本

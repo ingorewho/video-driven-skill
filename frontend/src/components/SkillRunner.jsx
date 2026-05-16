@@ -178,7 +178,8 @@ export default function SkillRunner() {
     setIsRunning(true); setLogs([]); setScreenshots([]); setResult(null); setActiveTab('logs')
     setLogs(prev => [...prev, { type: 'info', message: '正在连接运行服务…' }])
 
-    const wsUrl = `ws://localhost:8080/ws/skill-run`
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws/skill-run`
     const ws = new WebSocket(wsUrl)
     wsRef.current = ws
 

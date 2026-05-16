@@ -91,7 +91,22 @@ Browse, manage, and organize all your generated skills in one place.
 
 ## Quick Start
 
-### Prerequisites
+### Docker (recommended — no local Java or FFmpeg required)
+
+Install [Docker](https://docs.docker.com/get-docker/), configure `.env`, then:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+Open **http://localhost:3000**. Data is stored in the Docker volume `app-data`.
+
+---
+
+### From source
+
+#### Prerequisites
 
 - **Java 17+**
 - **Maven 3.8+**
@@ -194,6 +209,7 @@ http://localhost:3000
 video-driven-skill/
 ├── backend/                 # Spring Boot — API, video processing, AI, skill runner
 ├── frontend/                # React + Vite — studio UI
+├── docker-compose.yml       # One-command Docker deployment
 ├── docs/                    # Documentation & screenshots
 ├── scripts/
 │   └── kill-midscene.sh     # Optional cleanup helper
