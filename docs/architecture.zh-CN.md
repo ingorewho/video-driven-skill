@@ -41,6 +41,8 @@ Video Driven Skill 分为 Spring Boot 后端与 React 前端。二者通过 REST
 - `archives/`：可复用的视频 / 帧 / 需求素材。
 - `video-driven-skill.db`：SQLite 数据库。
 
+使用 **Docker Compose** 时，数据保存在 Compose 卷 `app-data` 中，容器内路径为 `/data`（环境变量 `VIDEO_DRIVEN_SKILL_HOME=/data`）。
+
 ## 前端
 
 前端为 Vite 应用，提供类似「工作室」的流程：

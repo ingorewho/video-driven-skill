@@ -91,108 +91,45 @@ Browse, manage, and organize all your generated skills in one place.
 
 ## Quick Start
 
-### Docker (recommended — no local Java or FFmpeg required)
+### Docker (recommended)
 
-Install [Docker](https://docs.docker.com/get-docker/), configure `.env`, then:
+Install [Docker](https://docs.docker.com/get-docker/) and run from the project root:
+
+**Windows**
+
+```bat
+.\scripts\run-in-docker.cmd
+```
+
+**macOS / Linux** (make executable once)
 
 ```bash
-cp .env.example .env
-docker compose up --build
+chmod +x scripts/run-in-docker.sh
+./scripts/run-in-docker.sh
 ```
 
-Open **http://localhost:3000**. Data is stored in the Docker volume `app-data`.
+**Edit `.env` and set `AI_API_KEY` on first run.**
 
-**Slow Docker Hub pulls?** Use the optional China mirror overlay:
+**If you are in China, recommend using the fast mirror:**
+
+```bat
+.\scripts\run-in-docker.cmd --cn
+```
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.cn.yml up --build
+./scripts/run-in-docker.sh --cn
 ```
 
-Or configure `registry-mirrors` in your Docker daemon settings.
+Custom port: set `FRONTEND_PORT=3000` in `.env`.
 
----
+Start without opening a browser:
 
-### From source
-
-#### Prerequisites
-
-- **Java 17+**
-- **Maven 3.8+**
-- **Node.js 18+** & npm 9+
-- **FFmpeg** (available on `PATH`)
-- An **OpenAI-compatible multimodal API** key
-
-Install FFmpeg:
+```bat
+.\scripts\run-in-docker.cmd --no-open
+```
 
 ```bash
-# macOS
-brew install ffmpeg
-
-# Ubuntu / Debian
-sudo apt-get update && sudo apt-get install ffmpeg
-
-# Windows (winget — open a new terminal after install so PATH updates)
-winget install Gyan.FFmpeg
-
-# Windows (Chocolatey, run PowerShell or CMD as Administrator)
-choco install ffmpeg
-
-# Windows (Scoop)
-scoop install ffmpeg
-```
-
-On Windows, if you install manually from [ffmpeg.org](https://ffmpeg.org/download.html#build-windows), unpack the archive and add the `bin` folder containing `ffmpeg.exe` to your user or system **PATH**, then confirm with `ffmpeg -version` in a new terminal.
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/ingorewho/video-driven-skill.git
-cd video-driven-skill
-```
-
-### 2. Configure Environment
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your API credentials:
-
-```bash
-export AI_API_KEY="your_api_key"
-# Optional overrides:
-export AI_BASE_URL="https://api.openai.com/v1"
-export AI_MODEL="gpt-4o-mini"
-```
-
-### 3. Start the Application
-
-**On macOS / Linux**, you can use the helper script at the repo root (requires `mvn`, `node`, `npm`, `curl`, `lsof`, `ffmpeg`, etc. — see preflight checks in `start.sh`):
-
-```bash
-chmod +x ./start.sh
-./start.sh
-```
-
-Common subcommands: `./start.sh status`, `./start.sh stop`, `./start.sh restart`, `./start.sh logs` (optionally `backend` or `frontend`).
-
-**Manual start** (works on all platforms, including Windows):
-
-```bash
-# Backend (port 8080)
-cd backend
-AI_API_KEY="your_api_key" mvn spring-boot:run
-
-# Frontend (port 3000 — separate terminal)
-cd frontend
-npm install
-npm run dev
-```
-
-### 4. Open in Browser
-
-```
-http://localhost:3000
+./scripts/run-in-docker.sh --no-open
 ```
 
 ---
@@ -221,21 +158,22 @@ video-driven-skill/
 ├── docker-compose.cn.yml    # Optional mirror overlay (slow Docker Hub)
 ├── docs/                    # Documentation & screenshots
 ├── scripts/
+│   ├── run-in-docker.cmd        # Docker start + open browser (Windows)
+│   ├── run-in-docker.sh         # Docker start + open browser (Unix)
 │   └── kill-midscene.sh     # Optional cleanup helper
-├── start.sh                 # Local development helper (Unix)
 ```
 
 ### Backend (Spring Boot / Java 17)
 
-| Module | Responsibility |
-|--------|----------------|
-| `controller/` | REST API & WebSocket entry points |
-| `service/VideoService` | Video upload, FFmpeg frame extraction, streaming |
-| `service/AIService` | Prompt construction & multimodal API calls |
-| `service/SkillService` | Skill CRUD, import/export, versioning |
+| Module                       | Responsibility                                                   |
+|------------------------------|------------------------------------------------------------------|
+| `controller/`                | REST API & WebSocket entry points                                |
+| `service/VideoService`       | Video upload, FFmpeg frame extraction, streaming                 |
+| `service/AIService`          | Prompt construction & multimodal API calls                       |
+| `service/SkillService`       | Skill CRUD, import/export, versioning                            |
 | `service/SkillRunnerService` | Workspace setup, dependency injection, execution, log collection |
-| `service/KnowledgeService` | Per-skill reference files & manifest |
-| `model/` & `repository/` | SQLite-backed domain entities |
+| `service/KnowledgeService`   | Per-skill reference files & manifest                             |
+| `model/` & `repository/`     | SQLite-backed domain entities                                    |
 
 Runtime data lives under `~/video-driven-skill/` by default (override with `VIDEO_DRIVEN_SKILL_HOME`; on Windows, the same folder name under your user profile):
 
@@ -244,18 +182,20 @@ Runtime data lives under `~/video-driven-skill/` by default (override with `VIDE
 - `archives/` — reusable video/frame/requirement resources
 - `video-driven-skill.db` — SQLite database
 
+With **Docker Compose**, the same layout is stored at `/data` inside the backend container (Compose volume `app-data`), not under `~/video-driven-skill/`. Inspect the host path with `docker volume inspect video-driven-skill_app-data`.
+
 ### Frontend (React + Vite + Tailwind CSS)
 
-| Component | Responsibility |
-|-----------|----------------|
-| `HomePage` | Upload, import, and recent resources |
-| `PlaygroundPage` | Frame annotation & skill workspace |
-| `FrameTimeline` / `FrameAnnotator` / `FrameList` | Visual evidence collection |
-| `AIProcessor` | Generation control & streamed status |
-| `SkillList` | Skill repository with drag-to-reorder |
-| `SkillEditor` / `SkillExport` / `SkillRunner` | Review, export & execution |
-| `RegeneratePanel` / `CodeComparisonView` | Iteration workflow |
-| `KnowledgeBasePanel` | Extra context per skill |
+| Component                                        | Responsibility                        |
+|--------------------------------------------------|---------------------------------------|
+| `HomePage`                                       | Upload, import, and recent resources  |
+| `PlaygroundPage`                                 | Frame annotation & skill workspace    |
+| `FrameTimeline` / `FrameAnnotator` / `FrameList` | Visual evidence collection            |
+| `AIProcessor`                                    | Generation control & streamed status  |
+| `SkillList`                                      | Skill repository with drag-to-reorder |
+| `SkillEditor` / `SkillExport` / `SkillRunner`    | Review, export & execution            |
+| `RegeneratePanel` / `CodeComparisonView`         | Iteration workflow                    |
+| `KnowledgeBasePanel`                             | Extra context per skill               |
 
 ### Skill Package Structure
 
@@ -273,23 +213,23 @@ For a deeper walkthrough, see [docs/architecture.md](docs/architecture.md).
 
 ## API Overview
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| `POST` | `/api/videos/upload` | Upload a video |
-| `POST` | `/api/videos/{id}/frames/auto` | Auto-extract frames |
-| `POST` | `/api/videos/{id}/frames/manual` | Manual frame capture |
-| `GET` | `/api/videos/{id}/stream` | Stream uploaded video |
-| `GET` | `/api/skills` | List all skills |
-| `PUT` | `/api/skills/order` | Persist skill ordering |
-| `POST` | `/api/skills/generate` | Generate a skill |
-| `GET` | `/api/skills/{id}` | Read a skill |
-| `PUT` | `/api/skills/{id}/files` | Update skill files |
-| `GET` | `/api/skills/{id}/export` | Export skill as ZIP |
-| `POST` | `/api/skills/{id}/regenerate` | Generate candidate revision |
+| Method | Path                                  | Purpose                        |
+|--------|---------------------------------------|--------------------------------|
+| `POST` | `/api/videos/upload`                  | Upload a video                 |
+| `POST` | `/api/videos/{id}/frames/auto`        | Auto-extract frames            |
+| `POST` | `/api/videos/{id}/frames/manual`      | Manual frame capture           |
+| `GET`  | `/api/videos/{id}/stream`             | Stream uploaded video          |
+| `GET`  | `/api/skills`                         | List all skills                |
+| `PUT`  | `/api/skills/order`                   | Persist skill ordering         |
+| `POST` | `/api/skills/generate`                | Generate a skill               |
+| `GET`  | `/api/skills/{id}`                    | Read a skill                   |
+| `PUT`  | `/api/skills/{id}/files`              | Update skill files             |
+| `GET`  | `/api/skills/{id}/export`             | Export skill as ZIP            |
+| `POST` | `/api/skills/{id}/regenerate`         | Generate candidate revision    |
 | `POST` | `/api/skills/{id}/partial-regenerate` | Regenerate selected code range |
-| `POST` | `/api/skills/{id}/accept` | Accept candidate revision |
-| `GET` | `/api/skills/{id}/versions` | List skill versions |
-| `POST` | `/api/skills/{id}/deploy` | Deploy skill locally |
+| `POST` | `/api/skills/{id}/accept`             | Accept candidate revision      |
+| `GET`  | `/api/skills/{id}/versions`           | List skill versions            |
+| `POST` | `/api/skills/{id}/deploy`             | Deploy skill locally           |
 
 ---
 
@@ -303,24 +243,6 @@ This repository is prepared for open-source use:
 - **Do not** upload private recordings, credentials, customer data, or production screenshots to any public instance.
 
 If you discover a security issue, please report it responsibly. See [SECURITY.md](SECURITY.md).
-
----
-
-## Development
-
-```bash
-# Backend compile
-cd backend && mvn -q -DskipTests compile
-
-# Frontend build
-cd frontend && npm run build
-
-# Check service status (Unix + start.sh)
-./start.sh status
-
-# Stop services
-./start.sh stop
-```
 
 ---
 

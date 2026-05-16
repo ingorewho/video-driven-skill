@@ -91,108 +91,45 @@ Video Driven Skill 是一套开源的**自动化工作室**：把**屏幕录屏*
 
 ## 快速开始
 
-### 使用 Docker（推荐，无需本机 Java / FFmpeg）
+### Docker（推荐）
 
-安装 [Docker](https://docs.docker.com/get-docker/) 后，配置 `.env` 并启动：
+安装 [Docker](https://docs.docker.com/get-docker/)，在项目根目录执行：
+
+**Windows**
+
+```bat
+.\scripts\run-in-docker.cmd
+```
+
+**macOS / Linux**（首次先赋予执行权限）
 
 ```bash
-cp .env.example .env
-docker compose up --build
+chmod +x scripts/run-in-docker.sh
+./scripts/run-in-docker.sh
 ```
 
-浏览器访问 **http://localhost:3000**。数据保存在 Docker 卷 `app-data` 中。
+**首次运行请编辑 `.env` 设置 `AI_API_KEY`。**
 
-**中国大陆**：若拉取基础镜像超时，可改用镜像加速：
+**如果你在中国大陆，建议使用国内镜像加速：**
+
+```bat
+.\scripts\run-in-docker.cmd --cn
+```
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.cn.yml up --build
+./scripts/run-in-docker.sh --cn
 ```
 
-或在 Docker Desktop → **Docker Engine** 中配置 `registry-mirrors` 并设置 `"ipv6": false`。
+改端口：在 `.env` 中设置 `FRONTEND_PORT=3000`。
 
----
+不自动打开浏览器：
 
-### 从源码运行
-
-#### 环境要求
-
-- **Java 17+**
-- **Maven 3.8+**
-- **Node.js 18+** 与 **npm 9+**
-- **FFmpeg**（已加入 `PATH`）
-- 可用的 **OpenAI 兼容多模态 API** 密钥
-
-安装 FFmpeg 示例：
+```bat
+.\scripts\run-in-docker.cmd --no-open
+```
 
 ```bash
-# macOS
-brew install ffmpeg
-
-# Ubuntu / Debian
-sudo apt-get update && sudo apt-get install ffmpeg
-
-# Windows（winget，安装后请新开终端以使 PATH 生效）
-winget install Gyan.FFmpeg
-
-# Windows（Chocolatey，管理员 PowerShell 或 CMD）
-choco install ffmpeg
-
-# Windows（Scoop）
-scoop install ffmpeg
-```
-
-若在 Windows 上从 [ffmpeg.org](https://ffmpeg.org/download.html#build-windows) 手动下载，请将包含 `ffmpeg.exe` 的 `bin` 目录加入用户或系统 **PATH**，并在新终端中执行 `ffmpeg -version` 确认。
-
-### 1. 克隆仓库
-
-```bash
-git clone https://github.com/ingorewho/video-driven-skill.git
-cd video-driven-skill
-```
-
-### 2. 配置环境
-
-```bash
-cp .env.example .env
-```
-
-编辑 `.env`，填入 API 等信息：
-
-```bash
-export AI_API_KEY="你的_API_密钥"
-# 可选覆盖项：
-export AI_BASE_URL="https://api.openai.com/v1"
-export AI_MODEL="gpt-4o-mini"
-```
-
-### 3. 启动应用
-
-**在 macOS / Linux 上**可使用项目根目录脚本（需已安装 `mvn`、`node`、`npm`、`curl`、`lsof`、`ffmpeg` 等，详见 `start.sh` 内预检）：
-
-```bash
-chmod +x ./start.sh
-./start.sh
-```
-
-常用子命令：`./start.sh status`、`./start.sh stop`、`./start.sh restart`、`./start.sh logs`（可加 `backend` / `frontend`）。
-
-**手动启动**（全平台通用，含 Windows）：
-
-```bash
-# 后端（默认端口 8080）
-cd backend
-AI_API_KEY="你的_api_key" mvn spring-boot:run
-
-# 前端（默认端口 3000，另开终端）
-cd frontend
-npm install
-npm run dev
-```
-
-### 4. 浏览器访问
-
-```
-http://localhost:3000
+./scripts/run-in-docker.sh --no-open
 ```
 
 ---
@@ -221,21 +158,22 @@ video-driven-skill/
 ├── docker-compose.cn.yml    # 可选：国内镜像加速
 ├── docs/                    # 文档与截图
 ├── scripts/
+│   ├── run-in-docker.cmd        # Docker 启动并打开浏览器（Windows）
+│   ├── run-in-docker.sh         # Docker 启动并打开浏览器（Unix）
 │   └── kill-midscene.sh     # 可选清理辅助脚本
-├── start.sh                 # 本地开发辅助（Unix）
 ```
 
 ### 后端（Spring Boot / Java 17）
 
-| 模块 | 职责 |
-|------|------|
-| `controller/` | REST API 与 WebSocket 入口 |
-| `service/VideoService` | 视频上传、FFmpeg 抽帧、流式传输 |
-| `service/AIService` | 提示词构建与多模态 API 调用 |
-| `service/SkillService` | 技能 CRUD、导入导出、版本管理 |
-| `service/SkillRunnerService` | 工作区准备、依赖注入、执行与日志采集 |
-| `service/KnowledgeService` | 每个技能的参考文件与清单 |
-| `model/`、`repository/` | 基于 SQLite 的领域实体与持久化 |
+| 模块                           | 职责                      |
+|------------------------------|-------------------------|
+| `controller/`                | REST API 与 WebSocket 入口 |
+| `service/VideoService`       | 视频上传、FFmpeg 抽帧、流式传输     |
+| `service/AIService`          | 提示词构建与多模态 API 调用        |
+| `service/SkillService`       | 技能 CRUD、导入导出、版本管理       |
+| `service/SkillRunnerService` | 工作区准备、依赖注入、执行与日志采集      |
+| `service/KnowledgeService`   | 每个技能的参考文件与清单            |
+| `model/`、`repository/`       | 基于 SQLite 的领域实体与持久化     |
 
 运行时数据默认位于 `~/video-driven-skill/`（可通过环境变量 `VIDEO_DRIVEN_SKILL_HOME` 覆盖；Windows 下对应用户主目录下的同名文件夹）：
 
@@ -244,18 +182,20 @@ video-driven-skill/
 - `archives/` — 可复用的视频 / 帧 / 需求归档
 - `video-driven-skill.db` — SQLite 数据库
 
+使用 **Docker Compose** 时，上述目录在容器内挂载为 `/data`（Compose 卷 `app-data`），不由 `~/video-driven-skill/` 提供；可用 `docker volume inspect video-driven-skill_app-data` 查看宿主机路径。
+
 ### 前端（React + Vite + Tailwind CSS）
 
-| 组件 | 职责 |
-|------|------|
-| `HomePage` | 上传、导入与最近资源 |
-| `PlaygroundPage` | 帧标注与技能工作区 |
-| `FrameTimeline` / `FrameAnnotator` / `FrameList` | 可视化证据收集 |
-| `AIProcessor` | 生成控制与流式状态 |
-| `SkillList` | 技能仓库与拖拽排序 |
-| `SkillEditor` / `SkillExport` / `SkillRunner` | 审阅、导出与执行 |
-| `RegeneratePanel` / `CodeComparisonView` | 迭代与对比 |
-| `KnowledgeBasePanel` | 每个技能的扩展上下文 |
+| 组件                                               | 职责         |
+|--------------------------------------------------|------------|
+| `HomePage`                                       | 上传、导入与最近资源 |
+| `PlaygroundPage`                                 | 帧标注与技能工作区  |
+| `FrameTimeline` / `FrameAnnotator` / `FrameList` | 可视化证据收集    |
+| `AIProcessor`                                    | 生成控制与流式状态  |
+| `SkillList`                                      | 技能仓库与拖拽排序  |
+| `SkillEditor` / `SkillExport` / `SkillRunner`    | 审阅、导出与执行   |
+| `RegeneratePanel` / `CodeComparisonView`         | 迭代与对比      |
+| `KnowledgeBasePanel`                             | 每个技能的扩展上下文 |
 
 ### 技能包结构
 
@@ -273,23 +213,23 @@ knowledge/            # 可选参考文件
 
 ## API 概览
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `POST` | `/api/videos/upload` | 上传视频 |
-| `POST` | `/api/videos/{id}/frames/auto` | 自动抽帧 |
-| `POST` | `/api/videos/{id}/frames/manual` | 手动截帧 |
-| `GET` | `/api/videos/{id}/stream` | 流式播放已上传视频 |
-| `GET` | `/api/skills` | 列出全部技能 |
-| `PUT` | `/api/skills/order` | 保存技能排序 |
-| `POST` | `/api/skills/generate` | 生成技能 |
-| `GET` | `/api/skills/{id}` | 读取技能 |
-| `PUT` | `/api/skills/{id}/files` | 更新技能文件 |
-| `GET` | `/api/skills/{id}/export` | 导出为 ZIP |
-| `POST` | `/api/skills/{id}/regenerate` | 生成候选修订版 |
-| `POST` | `/api/skills/{id}/partial-regenerate` | 局部重新生成 |
-| `POST` | `/api/skills/{id}/accept` | 接受候选修订 |
-| `GET` | `/api/skills/{id}/versions` | 列出技能版本 |
-| `POST` | `/api/skills/{id}/deploy` | 本地部署技能 |
+| 方法     | 路径                                    | 说明        |
+|--------|---------------------------------------|-----------|
+| `POST` | `/api/videos/upload`                  | 上传视频      |
+| `POST` | `/api/videos/{id}/frames/auto`        | 自动抽帧      |
+| `POST` | `/api/videos/{id}/frames/manual`      | 手动截帧      |
+| `GET`  | `/api/videos/{id}/stream`             | 流式播放已上传视频 |
+| `GET`  | `/api/skills`                         | 列出全部技能    |
+| `PUT`  | `/api/skills/order`                   | 保存技能排序    |
+| `POST` | `/api/skills/generate`                | 生成技能      |
+| `GET`  | `/api/skills/{id}`                    | 读取技能      |
+| `PUT`  | `/api/skills/{id}/files`              | 更新技能文件    |
+| `GET`  | `/api/skills/{id}/export`             | 导出为 ZIP   |
+| `POST` | `/api/skills/{id}/regenerate`         | 生成候选修订版   |
+| `POST` | `/api/skills/{id}/partial-regenerate` | 局部重新生成    |
+| `POST` | `/api/skills/{id}/accept`             | 接受候选修订    |
+| `GET`  | `/api/skills/{id}/versions`           | 列出技能版本    |
+| `POST` | `/api/skills/{id}/deploy`             | 本地部署技能    |
 
 ---
 
@@ -303,24 +243,6 @@ knowledge/            # 可选参考文件
 - **请勿**将私密录屏、口令、客户数据或生产环境截图上传到不可信的公共实例。
 
 若发现安全问题，请负责任地披露，详见 [SECURITY.md](SECURITY.md)。
-
----
-
-## 开发说明
-
-```bash
-# 后端编译
-cd backend && mvn -q -DskipTests compile
-
-# 前端构建
-cd frontend && npm run build
-
-# 查看服务状态（需 Unix 环境与 start.sh）
-./start.sh status
-
-# 停止服务
-./start.sh stop
-```
 
 ---
 

@@ -1,0 +1,71 @@
+@echo off
+setlocal EnableExtensions EnableDelayedExpansion
+
+REM Start Docker Compose and open the UI in the default browser when ready.
+REM Usage: scripts\run-in-docker.cmd [--cn] [--port 3000] [--no-open]
+
+cd /d "%~dp0.."
+
+set "CN=0"
+set "PORT="
+set "NO_OPEN=0"
+
+:parseArgs
+if "%~1"=="" goto argsDone
+if /I "%~1"=="--cn" set "CN=1" & shift & goto parseArgs
+if /I "%~1"=="--no-open" set "NO_OPEN=1" & shift & goto parseArgs
+if /I "%~1"=="--port" (
+  if "%~2"=="" (
+    echo Missing value for --port >&2
+    exit /b 1
+  )
+  set "PORT=%~2"
+  shift
+  shift
+  goto parseArgs
+)
+echo Unknown option: %~1 >&2
+exit /b 1
+
+:argsDone
+if not defined PORT (
+  if defined FRONTEND_PORT (set "PORT=%FRONTEND_PORT%") else set "PORT=3000"
+)
+
+if not exist ".env" (
+  if exist ".env.example" (
+    copy /Y ".env.example" ".env" >nul
+    echo Created .env from .env.example — set AI_API_KEY before using AI features.
+  ) else (
+    echo Warning: .env.example not found; create .env manually. >&2
+  )
+)
+
+echo Starting containers...
+if "%CN%"=="1" (
+  docker compose -f docker-compose.yml -f docker-compose.cn.yml up -d --build
+) else (
+  docker compose up -d --build
+)
+if errorlevel 1 exit /b 1
+
+set "URL=http://localhost:%PORT%/"
+echo Waiting for %URL% ...
+
+set /a ATTEMPTS=90
+:waitLoop
+curl -fsS -o nul -m 3 "%URL%" 2>nul
+if not errorlevel 1 goto ready
+set /a ATTEMPTS-=1
+if %ATTEMPTS% LEQ 0 goto timeout
+timeout /t 2 /nobreak >nul
+goto waitLoop
+
+:ready
+echo Ready: %URL%
+if "%NO_OPEN%"=="0" start "" "%URL%"
+exit /b 0
+
+:timeout
+echo Timed out waiting for the UI. Check: docker compose logs -f >&2
+exit /b 1

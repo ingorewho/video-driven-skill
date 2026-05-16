@@ -39,6 +39,8 @@ Runtime data defaults to `~/video-driven-skill/`:
 - `archives/`: reusable video/frame/requirement resources.
 - `video-driven-skill.db`: SQLite database.
 
+With **Docker Compose**, data is stored in the `app-data` volume at `/data` in the backend container (`VIDEO_DRIVEN_SKILL_HOME=/data`).
+
 ## Frontend
 
 The frontend is a Vite application that provides a studio-like workflow:
