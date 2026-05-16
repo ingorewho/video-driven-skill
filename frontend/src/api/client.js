@@ -8,8 +8,11 @@ const client = axios.create({
 client.interceptors.response.use(
   (res) => res.data,
   (err) => {
-    const msg = err.response?.data?.message || err.message || 'Request failed'
-    return Promise.reject(new Error(msg))
+    const data = err.response?.data
+    const msg = data?.message || err.message || 'Request failed'
+    const error = new Error(msg)
+    if (data?.code) error.code = data.code
+    return Promise.reject(error)
   }
 )
 

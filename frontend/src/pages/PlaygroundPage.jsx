@@ -41,12 +41,19 @@ export default function PlaygroundPage() {
     if (videoId === 'history' || videoId === 'frames') setActiveTab('skill')
   }, [videoId, setActiveTab])
 
+  const handleExtractFailure = (e) => {
+    setExtractError(e.message)
+    if (e.code === 'FFMPEG_NOT_FOUND') {
+      alert(e.message)
+    }
+  }
+
   const handleAutoExtract = async () => {
     setExtracting(true); setExtractError(null)
     try {
       const frames = await extractFramesAuto(videoId, interval)
       addFrames(frames)
-    } catch (e) { setExtractError(e.message) }
+    } catch (e) { handleExtractFailure(e) }
     finally { setExtracting(false) }
   }
 
@@ -55,7 +62,7 @@ export default function PlaygroundPage() {
     try {
       const frames = await extractFramesManual(videoId, [timestamp])
       addFrames(frames)
-    } catch (e) { setExtractError(e.message) }
+    } catch (e) { handleExtractFailure(e) }
     finally { setExtracting(false) }
   }
 
