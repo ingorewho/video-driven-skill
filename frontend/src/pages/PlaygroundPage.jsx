@@ -14,7 +14,9 @@ import SkillRunner from '../components/SkillRunner.jsx'
 import ArchiveBrowser from '../components/ArchiveBrowser.jsx'
 import SaveResourceButton from '../components/SaveResourceButton.jsx'
 import FFmpegMissingDialog from '../components/FFmpegMissingDialog.jsx'
+import ScreenRecorderModal from '../components/ScreenRecorderModal.jsx'
 import { extractFramesAuto, extractFramesManual, uploadVideo } from '../api/client.js'
+import { isScreenRecordingSupported } from '../utils/screenRecorder.js'
 
 export default function PlaygroundPage() {
   const { videoId } = useParams()
@@ -36,6 +38,8 @@ export default function PlaygroundPage() {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [ffmpegDialogMessage, setFFmpegDialogMessage] = useState(null)
+  const [recorderOpen, setRecorderOpen] = useState(false)
+  const canRecord = isScreenRecordingSupported()
 
   const fileInputRef = useRef()
 
@@ -78,6 +82,23 @@ export default function PlaygroundPage() {
       navigate(`/playground/${res.videoId}`)
     } catch (e) { alert('上传失败: ' + e.message) }
     finally { setUploading(false) }
+  }
+
+  const handleRecordingUpload = async (file, onProgress) => {
+    setUploading(true)
+    setUploadProgress(0)
+    reset()
+    try {
+      const res = await uploadVideo(file, onProgress)
+      setVideo(res.videoId, res.filename, res.duration)
+      setActiveTab('annotate')
+      navigate(`/playground/${res.videoId}`)
+    } catch (e) {
+      alert('上传失败: ' + e.message)
+      throw e
+    } finally {
+      setUploading(false)
+    }
   }
 
   return (
@@ -160,8 +181,14 @@ export default function PlaygroundPage() {
       <div className='flex-1 flex overflow-hidden'>
         {activeTab === 'annotate' ? (
           !storeVideoId ? (
-            <EmptyUploadHint onClick={() => fileInputRef.current?.click()} navigate={navigate}
-              setVideo={setVideo} setActiveTab={setActiveTab} addFrames={addFrames} />
+            <EmptyUploadHint
+              onClick={() => fileInputRef.current?.click()}
+              onRecord={canRecord ? () => setRecorderOpen(true) : undefined}
+              navigate={navigate}
+              setVideo={setVideo}
+              setActiveTab={setActiveTab}
+              addFrames={addFrames}
+            />
           ) : (
             <div className='flex-1 grid grid-cols-[minmax(0,1fr)_340px] gap-5 px-6 py-5 overflow-hidden'>
               <div className='flex min-w-0 flex-col gap-4'>
@@ -307,23 +334,31 @@ export default function PlaygroundPage() {
         message={ffmpegDialogMessage || ''}
         onClose={() => setFFmpegDialogMessage(null)}
       />
+
+      <ScreenRecorderModal
+        open={recorderOpen}
+        onClose={() => setRecorderOpen(false)}
+        onUpload={handleRecordingUpload}
+      />
     </div>
   )
 }
 
-function EmptyUploadHint({ onClick, navigate, setVideo, setActiveTab, addFrames }) {
+function EmptyUploadHint({ onClick, onRecord, navigate, setVideo, setActiveTab, addFrames }) {
   return (
     <div className='flex-1 flex flex-col items-center justify-center px-8 py-16'>
-      <div className='text-center max-w-lg'>
+      <div className='text-center max-w-lg w-full'>
         <div className='eyebrow mb-5'>Step · 01 — Upload</div>
         <h2 className='font-display text-4xl text-ink-900 mb-4' style={{ fontVariationSettings: "'opsz' 120" }}>
-          先上传一段<span className='italic text-umber-500'>视频</span>
+          上传或录制一段<span className='italic text-umber-500'>视频</span>
         </h2>
         <p className='text-ink-500 text-sm leading-relaxed mb-10 max-w-sm mx-auto'>
           任何操作录屏都可以。AI 会分析画面与你的操作流程，生成可直接运行的自动化脚本。
         </p>
 
+        <div className='space-y-3'>
         <button
+          type='button'
           onClick={onClick}
           className='group card-paper w-full py-10 px-8 cursor-pointer transition-all duration-500 hover:-translate-y-0.5 hover:shadow-lift text-left'
         >
@@ -333,9 +368,9 @@ function EmptyUploadHint({ onClick, navigate, setVideo, setActiveTab, addFrames 
                 <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12' />
               </svg>
             </div>
-            <div className='flex-1'>
+            <div className='flex-1 text-left'>
               <div className='font-display text-xl text-ink-900'>点击选择文件</div>
-              <div className='text-ink-500 text-sm mt-1'>支持 MP4、MOV、AVI 等格式</div>
+              <div className='text-ink-500 text-sm mt-1'>支持 MP4、MOV、WebM 等格式</div>
             </div>
             <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'
               className='text-ink-400 transition-transform duration-500 group-hover:translate-x-1'>
@@ -343,6 +378,32 @@ function EmptyUploadHint({ onClick, navigate, setVideo, setActiveTab, addFrames 
             </svg>
           </div>
         </button>
+
+        {onRecord && (
+          <button
+            type='button'
+            onClick={onRecord}
+            className='group card-paper w-full py-10 px-8 cursor-pointer transition-all duration-500 hover:-translate-y-0.5 hover:shadow-lift text-left ring-1 ring-clay-500/15'
+          >
+            <div className='flex items-center gap-6'>
+              <div className='w-14 h-14 rounded-full bg-clay-500/10 flex items-center justify-center text-clay-600'>
+                <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'>
+                  <rect x='2' y='4' width='20' height='14' rx='2' />
+                  <circle cx='12' cy='11' r='3' fill='currentColor' stroke='none' />
+                </svg>
+              </div>
+              <div className='flex-1 text-left'>
+                <div className='font-display text-xl text-ink-900'>开始录屏</div>
+                <div className='text-ink-500 text-sm mt-1'>共享屏幕，预览确认后上传</div>
+              </div>
+              <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'
+                className='text-clay-500/70 transition-transform duration-500 group-hover:translate-x-1'>
+                <path d='M5 12h14M13 5l7 7-7 7' />
+              </svg>
+            </div>
+          </button>
+        )}
+        </div>
 
         <div className='mt-10 pt-8 border-t hairline'>
           <div className='eyebrow mb-4'>Or · 使用已保存资源</div>

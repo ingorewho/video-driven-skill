@@ -9,6 +9,8 @@ import {
   importSkill,
 } from '../api/client.js'
 import useAppStore from '../store/useAppStore.js'
+import ScreenRecorderModal from '../components/ScreenRecorderModal.jsx'
+import { isScreenRecordingSupported } from '../utils/screenRecorder.js'
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -33,6 +35,8 @@ export default function HomePage() {
 
   const [importing, setImporting] = useState(false)
   const [importProgress, setImportProgress] = useState(0)
+  const [recorderOpen, setRecorderOpen] = useState(false)
+  const canRecord = isScreenRecordingSupported()
 
   const inputRef = useRef()
   const importInputRef = useRef()
@@ -52,17 +56,25 @@ export default function HomePage() {
     finally { setLoadingSkills(false); setLoadingArchives(false) }
   }
 
-  const handleFile = async (file) => {
+  const handleFile = async (file, onProgress = setProgress) => {
     if (!file || !file.type.startsWith('video/')) {
-      setError('请上传视频文件（MP4、MOV 等）')
+      setError('请上传视频文件（MP4、MOV、WebM 等）')
       return
     }
-    setError(null); setUploading(true); setProgress(0); reset()
+    setError(null); setUploading(true); onProgress(0); reset()
     try {
-      const res = await uploadVideo(file, setProgress)
+      const res = await uploadVideo(file, onProgress)
       setVideo(res.videoId, res.filename, res.duration)
       navigate(`/playground/${res.videoId}`)
-    } catch (e) { setError(e.message); setUploading(false) }
+    } catch (e) {
+      setError(e.message)
+      setUploading(false)
+      throw e
+    }
+  }
+
+  const handleRecordingUpload = async (file, onProgress) => {
+    await handleFile(file, onProgress)
   }
 
   const handleDrop = (e) => {
@@ -168,7 +180,7 @@ export default function HomePage() {
 
         {/* ── Quick Actions + Upload ── */}
         <section className='mt-8 stagger'>
-          <div className='grid grid-cols-1 lg:grid-cols-3 gap-5'>
+          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-5 ${canRecord ? 'xl:grid-cols-4' : 'lg:grid-cols-3'}`}>
 
             {/* Upload zone */}
             <div
@@ -211,6 +223,33 @@ export default function HomePage() {
                 </div>
               )}
             </div>
+
+            {canRecord && (
+              <div
+                onClick={() => !uploading && !importing && setRecorderOpen(true)}
+                className={`relative card-paper overflow-hidden cursor-pointer group transition-all duration-500
+                  ${uploading || importing ? 'opacity-60 pointer-events-none' : 'hover:-translate-y-0.5 hover:shadow-lift'}`}
+                style={{ padding: '40px 32px' }}
+              >
+                <Corners />
+                <div className='relative text-center'>
+                  <div className='eyebrow mb-4'>Step 01 · Record</div>
+                  <div className='w-11 h-11 mx-auto rounded-xl bg-clay-500/10 flex items-center justify-center text-clay-600 mb-3 group-hover:bg-clay-500/15 transition-colors duration-300'>
+                    <RecordIcon />
+                  </div>
+                  <div className='font-display text-[26px] leading-tight text-ink-900 mb-2'>
+                    开始录屏
+                  </div>
+                  <p className='text-ink-500 text-[12.5px] max-w-[220px] mx-auto leading-relaxed mb-5'>
+                    共享屏幕或窗口，录完预览确认后自动上传
+                  </p>
+                  <div className='inline-flex items-center gap-2 text-[12px] text-clay-600 font-medium transition-transform duration-500 group-hover:translate-x-1'>
+                    <span>立即录制</span>
+                    <ArrowIcon />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Import skill */}
             <div
@@ -411,6 +450,12 @@ export default function HomePage() {
           <span>Built for reuse</span>
         </footer>
       </div>
+
+      <ScreenRecorderModal
+        open={recorderOpen}
+        onClose={() => setRecorderOpen(false)}
+        onUpload={handleRecordingUpload}
+      />
     </div>
   )
 }
@@ -489,6 +534,15 @@ function VideoGlyph() {
     <svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.4' strokeLinecap='round' strokeLinejoin='round'>
       <rect x='3' y='6' width='13' height='12' rx='2' />
       <path d='M16 10l5-3v10l-5-3z' />
+    </svg>
+  )
+}
+
+function RecordIcon() {
+  return (
+    <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'>
+      <rect x='2' y='4' width='20' height='14' rx='2' />
+      <circle cx='12' cy='11' r='3' fill='currentColor' stroke='none' />
     </svg>
   )
 }
