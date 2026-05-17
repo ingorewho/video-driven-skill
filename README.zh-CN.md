@@ -93,7 +93,14 @@ Video Driven Skill 是一套开源的**自动化工作室**：把**屏幕录屏*
 
 ### Docker（推荐）
 
-安装 [Docker](https://docs.docker.com/get-docker/)，在项目根目录执行：
+安装 [Docker](https://docs.docker.com/get-docker/)，克隆仓库：
+
+```bash
+git clone https://github.com/ingorewho/video-driven-skill.git
+cd video-driven-skill
+```
+
+在项目根目录执行：
 
 **Windows**
 

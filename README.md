@@ -93,7 +93,14 @@ Browse, manage, and organize all your generated skills in one place.
 
 ### Docker (recommended)
 
-Install [Docker](https://docs.docker.com/get-docker/) and run from the project root:
+Install [Docker](https://docs.docker.com/get-docker/), then clone the repository:
+
+```bash
+git clone https://github.com/ingorewho/video-driven-skill.git
+cd video-driven-skill
+```
+
+Run from the project root:
 
 **Windows**
 
